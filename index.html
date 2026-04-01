@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>小二特製：動漫聖地巡禮地圖 (穩定版)</title>
+    <title>小二特製：動漫聖地巡禮地圖 (Google圖資版)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
@@ -80,10 +80,10 @@
     <script>
         var map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
         
-        // 這是最絕對安全的 OSM 底圖，強制加 https
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
+        // 終極解法：強制使用 Google Maps 官方圖資 (帶有繁體中文參數 hl=zh-TW)
+        L.tileLayer('https://mt0.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            attribution: '© Google Maps'
         }).addTo(map);
         
         L.control.zoom({ position: 'bottomright' }).addTo(map);
