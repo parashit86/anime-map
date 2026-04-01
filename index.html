@@ -136,32 +136,32 @@
 
                     var marker = L.marker([site.lat, site.lng], { icon: customIcon });
                     
-                    // 動態產生 Google 街景的連結 (帶入經緯度)
-                    var streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${site.lat},${site.lng}`;
+                    // 動態產生 Google 地圖的連結 (帶入經緯度)
+                    var streetViewUrl = \`https://www.google.com/maps/search/?api=1&query=\${site.lat},\${site.lng}\`;
 
-                    var popupContent = `
+                    var popupContent = \`
                         <div class="popup-header">
-                            ${site.anime}
-                            <span class="tag">EP: ${site.episode}</span>
+                            \${site.anime}
+                            <span class="tag">EP: \${site.episode}</span>
                         </div>
                         <div class="popup-body">
-                            <div class="popup-loc">${site.location}</div>
-                            <div class="popup-desc">${site.scene}</div>
+                            <div class="popup-loc">\${site.location}</div>
+                            <div class="popup-desc">\${site.scene}</div>
                             
                             <!-- 動畫場景與來源標註 -->
                             <div class="anime-img-box">
-                                <img src="${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
+                                <img src="\${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
                             </div>
                             <div class="source-text">
-                                圖片來源: <a href="${site.sourceUrl}" target="_blank">${site.imageSource}</a>
+                                圖片來源: <a href="\${site.sourceUrl}" target="_blank">\${site.imageSource}</a>
                             </div>
 
                             <!-- 街景按鈕 -->
-                            <a href="${streetViewUrl}" target="_blank" class="sv-btn">
-                                🗺️ 點此開啟 Google 360° 街景比對
+                            <a href="\${streetViewUrl}" target="_blank" class="sv-btn">
+                                🗺️ 開啟 Google 地圖查看實景
                             </a>
                         </div>
-                    `;
+                    \`;
                     marker.bindPopup(popupContent);
                     markerGroup.addLayer(marker);
                 }
