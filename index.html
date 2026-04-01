@@ -2,14 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>小二特製：動漫聖地巡禮地圖 (Pro 版)</title>
-    <!-- 引入 Leaflet 地圖引擎的 CSS 和 JS -->
+    <title>小二特製：動漫聖地巡禮地圖 (版權標註 & 街景版)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body { margin: 0; padding: 0; font-family: '微軟正黑體', sans-serif; background: #f0f0f0; }
         
-        /* 懸浮控制列 (仿 Anitabi 風格) */
         #controls {
             position: absolute;
             top: 15px;
@@ -24,103 +22,45 @@
             gap: 15px;
             backdrop-filter: blur(5px);
         }
-        #controls h3 { margin: 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 5px; }
-        select { 
-            font-size: 14px; 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            border: 1px solid #ddd;
-            outline: none;
-            cursor: pointer;
-        }
-
+        #controls h3 { margin: 0; font-size: 16px; color: #333; }
+        select { font-size: 14px; padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; outline: none; cursor: pointer; }
         #map { height: 100vh; width: 100vw; }
         
-        /* 圓形頭像標記 (仿 Anitabi 地圖上的圓形截圖) */
+        /* 圓形頭像標記 */
         .custom-icon-wrapper {
-            width: 44px;
-            height: 44px;
-            background: white;
-            border-radius: 50%;
-            border: 2px solid #e74c3c;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            position: relative;
+            width: 44px; height: 44px; background: white; border-radius: 50%;
+            border: 2px solid #e74c3c; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative;
         }
         .custom-icon-wrapper::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0; 
-            height: 0; 
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 6px solid #e74c3c;
+            content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+            border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #e74c3c;
         }
-        .custom-icon-wrapper img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
+        .custom-icon-wrapper img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 
-        /* 彈出視窗排版 (沉浸式對照圖) */
+        /* 彈出視窗排版 */
         .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 12px; }
         .leaflet-popup-content { margin: 0; width: 340px !important; }
-        
-        .popup-header {
-            background: #e74c3c;
-            color: white;
-            padding: 10px 15px;
-            font-weight: bold;
-            font-size: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .popup-header span.tag {
-            background: rgba(255,255,255,0.2);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-        }
-        
+        .popup-header { background: #e74c3c; color: white; padding: 10px 15px; font-weight: bold; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .popup-header span.tag { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; }
         .popup-body { padding: 15px; }
         .popup-loc { font-weight: bold; font-size: 16px; margin-bottom: 5px; color: #222; }
         .popup-desc { font-size: 13px; color: #555; margin-bottom: 12px; line-height: 1.5; }
         
-        /* 左右對照圖 */
-        .image-container {
-            display: flex;
-            gap: 10px;
+        /* 動畫圖與來源標註 */
+        .anime-img-box { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 5px; }
+        .anime-img-box img { width: 100%; height: 140px; object-fit: cover; display: block; }
+        .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 10px; }
+        .source-text a { color: #888; text-decoration: underline; }
+        
+        /* 街景按鈕 */
+        .sv-btn {
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            background: #4285F4; color: white; text-align: center; padding: 10px;
+            border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;
+            transition: background 0.2s;
         }
-        .image-box {
-            flex: 1;
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .image-box img {
-            width: 100%;
-            height: 110px;
-            object-fit: cover;
-            display: block;
-        }
-        .image-label {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            font-size: 11px;
-            text-align: center;
-            padding: 3px 0;
-        }
+        .sv-btn:hover { background: #357ae8; color: white; }
     </style>
 </head>
 <body>
@@ -138,19 +78,12 @@
 
     <script>
         var map = L.map('map', { zoomControl: false }).setView([38.0, 140.0], 6);
-
-        // 使用更乾淨的地圖底圖 (仿 Anitabi 簡潔風格)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap © CARTO'
-        }).addTo(map);
-
-        // 把縮放按鈕移到右下角
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         var markerGroup = L.layerGroup().addTo(map);
 
-        // 核心資料庫 (包含動畫截圖作為地圖上的頭像)
+        // 資料庫：新增 imageSource 與 sourceUrl，移除失效的實景圖
         var holyLands = [
             {
                 anime: "灌籃高手",
@@ -159,9 +92,9 @@
                 lng: 139.5020,
                 episode: "OP 片頭曲",
                 scene: "櫻木花道與晴子在平交道兩端揮手的經典畫面，湘南海岸的陽光與電車。",
-                // 這裡的 animeImg 會被當作地圖上的圓形大頭針！
                 animeImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Kamakurak%C5%8Dk%C5%8Dmae_Station_level_crossing.jpg/640px-Kamakurak%C5%8Dk%C5%8Dmae_Station_level_crossing.jpg",
-                realImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Kamakurak%C5%8Dk%C5%8Dmae_Station_level_crossing.jpg/640px-Kamakurak%C5%8Dk%C5%8Dmae_Station_level_crossing.jpg"
+                imageSource: "Wikimedia Commons",
+                sourceUrl: "https://commons.wikimedia.org/wiki/File:Kamakurak%C5%8Dk%C5%8Dmae_Station_level_crossing.jpg"
             },
             {
                 anime: "排球少年",
@@ -170,8 +103,9 @@
                 lng: 141.4628,
                 episode: "全系列主要舞台",
                 scene: "烏野高中的現實原型！周邊還有日向和影山練球的河川敷，以及嶋田超市原型。",
-                animeImg: "https://placehold.co/400x300/f39c12/white?text=Karasuno",
-                realImg: "https://placehold.co/400x300/34495e/white?text=Karumai+High"
+                animeImg: "https://placehold.co/400x200/f39c12/white?text=Karasuno+High+School",
+                imageSource: "版權示意圖 (Placehold)",
+                sourceUrl: "#"
             },
             {
                 anime: "排球少年",
@@ -181,7 +115,8 @@
                 episode: "第一季：宮城縣預選賽",
                 scene: "烏野高中對戰青葉城西的經典舞台，館內設施與動畫中幾乎一模一樣！",
                 animeImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Sendai_Gymnasium_2011.jpg/640px-Sendai_Gymnasium_2011.jpg",
-                realImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Sendai_Gymnasium_2011.jpg/640px-Sendai_Gymnasium_2011.jpg"
+                imageSource: "Wikimedia Commons",
+                sourceUrl: "https://commons.wikimedia.org/wiki/File:Sendai_Gymnasium_2011.jpg"
             }
         ];
 
@@ -191,11 +126,9 @@
 
             holyLands.forEach(function(site) {
                 if (selectedAnime === "all" || site.anime === selectedAnime) {
-                    
-                    // 製作仿 Anitabi 的「圓形截圖地標」
                     var customIcon = L.divIcon({
                         className: 'custom-icon',
-                        html: `<div class="custom-icon-wrapper"><img src="${site.animeImg}" alt="icon"></div>`,
+                        html: `<div class="custom-icon-wrapper"><img src="${site.animeImg}" alt="icon" onerror="this.src='https://placehold.co/44x44/ccc/fff?text=?'"></div>`,
                         iconSize: [44, 50],
                         iconAnchor: [22, 50],
                         popupAnchor: [0, -50]
@@ -203,7 +136,9 @@
 
                     var marker = L.marker([site.lat, site.lng], { icon: customIcon });
                     
-                    // 製作沉浸式的彈出視窗
+                    // 動態產生 Google 街景的連結 (帶入經緯度)
+                    var streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${site.lat},${site.lng}`;
+
                     var popupContent = `
                         <div class="popup-header">
                             ${site.anime}
@@ -212,16 +147,19 @@
                         <div class="popup-body">
                             <div class="popup-loc">${site.location}</div>
                             <div class="popup-desc">${site.scene}</div>
-                            <div class="image-container">
-                                <div class="image-box">
-                                    <img src="${site.animeImg}" alt="動畫場景">
-                                    <div class="image-label">動畫場景</div>
-                                </div>
-                                <div class="image-box">
-                                    <img src="${site.realImg}" alt="實景照片">
-                                    <div class="image-label">現實實景</div>
-                                </div>
+                            
+                            <!-- 動畫場景與來源標註 -->
+                            <div class="anime-img-box">
+                                <img src="${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
                             </div>
+                            <div class="source-text">
+                                圖片來源: <a href="${site.sourceUrl}" target="_blank">${site.imageSource}</a>
+                            </div>
+
+                            <!-- 街景按鈕 -->
+                            <a href="${streetViewUrl}" target="_blank" class="sv-btn">
+                                🗺️ 點此開啟 Google 360° 街景比對
+                            </a>
                         </div>
                     `;
                     marker.bindPopup(popupContent);
@@ -230,9 +168,7 @@
             });
         }
 
-        // 初始化
         filterMap();
-
     </script>
 </body>
 </html>
