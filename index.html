@@ -85,10 +85,9 @@
     <script>
         var map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
         
-        // 【終極殺招】：直接使用 Google Maps 的底圖伺服器！保證絕對連得上、不灰屏！
-        L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-            maxZoom: 20,
-            attribution: '© Google Maps'
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
         
         L.control.zoom({ position: 'bottomright' }).addTo(map);
