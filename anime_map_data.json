@@ -12,57 +12,13 @@
     },
     {
         "anime": "排球少年!!",
-        "location": "轻米高中",
-        "lat": 40.3217,
-        "lng": 141.4588,
-        "episode": "EP 1",
-        "scene": "Anitabi ID: e3m6x429z",
+        "location": "岩手縣立輕米高等學校 (烏野高中)",
+        "lat": 40.3283,
+        "lng": 141.4628,
+        "episode": "全系列主要舞台",
+        "scene": "烏野高中的現實原型",
         "animeImg": "https://image.anitabi.cn/user/0/bangumi/84171/points/e3m6x429z-1697922185059.jpg?plan=h360",
-        "imageSource": "Anitabi.cn",
-        "sourceUrl": "https://www.anitabi.cn/map?bangumiId=84171"
-    },
-    {
-        "anime": "排球少年!!",
-        "location": "轻米食堂内",
-        "lat": 40.3266,
-        "lng": 141.4627,
-        "episode": "EP 10",
-        "scene": "Anitabi ID: 2o4as6p",
-        "animeImg": "https://image.anitabi.cn/user/0/bangumi/84171/points/2o4as6p-1752822598970.jpg?plan=h360",
-        "imageSource": "Anitabi.cn",
-        "sourceUrl": "https://www.anitabi.cn/map?bangumiId=84171"
-    },
-    {
-        "anime": "排球少年!!",
-        "location": "仙台体育馆",
-        "lat": 38.2179,
-        "lng": 140.8691,
-        "episode": "EP 19",
-        "scene": "Anitabi ID: ac2hs519n",
-        "animeImg": "https://image.anitabi.cn/user/0/bangumi/84171/points/ac2hs519n-1687300288099.jpg?plan=h360",
-        "imageSource": "Anitabi.cn",
-        "sourceUrl": "https://www.anitabi.cn/map?bangumiId=84171"
-    },
-    {
-        "anime": "排球少年!!",
-        "location": "Takesawa Store",
-        "lat": 40.3245,
-        "lng": 141.4654,
-        "episode": "EP 14",
-        "scene": "Anitabi ID: 2o4as06",
-        "animeImg": "https://image.anitabi.cn/user/0/bangumi/84171/points/2o4as06-1752822598967.jpg?plan=h360",
-        "imageSource": "Anitabi.cn",
-        "sourceUrl": "https://www.anitabi.cn/map?bangumiId=84171"
-    },
-    {
-        "anime": "排球少年!!",
-        "location": "兼田商店",
-        "lat": 40.323,
-        "lng": 141.4597,
-        "episode": "EP 5",
-        "scene": "Anitabi ID: 2o4aryr",
-        "animeImg": "https://image.anitabi.cn/user/0/bangumi/84171/points/2o4aryr-1752822598965.jpg?plan=h360",
-        "imageSource": "Anitabi.cn",
-        "sourceUrl": "https://www.anitabi.cn/map?bangumiId=84171"
+        "imageSource": "Anitabi",
+        "sourceUrl": "https://www.anitabi.cn/"
     }
 ]
