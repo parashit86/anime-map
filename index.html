@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>小二特製：動漫聖地巡禮地圖 (Google圖資版)</title>
+    <title>小二特製：動漫聖地巡禮地圖 (穩定版)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
@@ -78,7 +78,6 @@
     <script>
         var map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
         
-        // 終極解法：強制使用 Google Maps 官方圖資 (帶有繁體中文參數 hl=zh-TW)
         L.tileLayer('https://mt0.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', {
             maxZoom: 20,
             attribution: '© Google Maps'
@@ -90,32 +89,29 @@
 
         var holyLands = [];
 
-        // 載入外部設定檔 (JSON)
-        fetch('anime_map_data.json')
-            .then(response => response.json())
+        // 使用 fetch 取得外部 JSON
+        fetch('anime_map_data.json?v=' + new Date().getTime())
+            .then(response => {
+                if (!response.ok) throw new Error("網路錯誤");
+                return response.json();
+            })
             .then(data => {
                 holyLands = data;
-                
-                // 動態生成下拉選單選項
                 var filterSelect = document.getElementById('anime-filter');
                 var uniqueAnimes = [...new Set(data.map(item => item.anime))];
-                
-                // 清空預設選項並重新加入 "所有作品"
                 filterSelect.innerHTML = '<option value="all">所有作品</option>';
-                
                 uniqueAnimes.forEach(anime => {
                     var option = document.createElement('option');
                     option.value = anime;
                     option.textContent = '🎬 ' + anime;
                     filterSelect.appendChild(option);
                 });
-
                 filterMap();
                 map.invalidateSize();
             })
             .catch(error => {
-                console.error('載入 anime_map_data.json 失敗:', error);
-                alert('無法載入地圖資料，請確認 anime_map_data.json 檔案存在且格式正確。');
+                console.error(error);
+                alert('載入失敗，可能是 Github 快取或檔案格式問題，請稍後再試。');
             });
 
         function filterMap() {
@@ -133,39 +129,34 @@
                     });
 
                     var marker = L.marker([site.lat, site.lng], { icon: customIcon });
-                    var streetViewUrl = \`https://www.google.com/maps/search/?api=1&query=\${site.lat},\${site.lng}\`;
+                    var streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${site.lat},${site.lng}`;
 
-                    var popupContent = \`
+                    var popupContent = `
                         <div class="popup-header">
-                            \${site.anime}
-                            <span class="tag">EP: \${site.episode}</span>
+                            ${site.anime}
+                            <span class="tag">EP: ${site.episode}</span>
                         </div>
                         <div class="popup-body">
-                            <div class="popup-loc">\${site.location}</div>
-                            <div class="popup-desc">\${site.scene}</div>
+                            <div class="popup-loc">${site.location}</div>
+                            <div class="popup-desc">${site.scene}</div>
                             
                             <div class="anime-img-box">
-                                <img src="\${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
+                                <img src="${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
                             </div>
                             <div class="source-text">
-                                圖片來源: <a href="\${site.sourceUrl}" target="_blank">\${site.imageSource}</a>
+                                圖片來源: <a href="${site.sourceUrl}" target="_blank">${site.imageSource}</a>
                             </div>
 
-                            <a href="\${streetViewUrl}" target="_blank" class="sv-btn">
+                            <a href="${streetViewUrl}" target="_blank" class="sv-btn">
                                 🗺️ 開啟 Google 地圖查看實景
                             </a>
                         </div>
-                    \`;
+                    `;
                     marker.bindPopup(popupContent);
                     markerGroup.addLayer(marker);
                 }
             });
         }
-
-        // setTimeout(function() {
-        //     filterMap();
-        //     map.invalidateSize();
-        // }, 300);
     </script>
 </body>
 </html>
