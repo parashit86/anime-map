@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>小二特製：動漫聖地巡禮地圖 (無敵秒開版)</title>
-    <!-- 改用全球最穩定的 Cloudflare CDN -->
+    <title>小二特製：動漫聖地巡禮地圖 (穩定版)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
@@ -32,7 +31,6 @@
         
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; }
         
-        /* 圓形頭像標記 */
         .custom-icon-wrapper {
             width: 40px; height: 40px; background: white; border-radius: 50%;
             border: 2px solid #e74c3c; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
@@ -44,7 +42,6 @@
         }
         .custom-icon-wrapper img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 
-        /* 彈出視窗排版 */
         .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 12px; }
         .leaflet-popup-content { margin: 0; width: 280px !important; }
         @media (min-width: 400px) { .leaflet-popup-content { width: 320px !important; } }
@@ -55,13 +52,11 @@
         .popup-loc { font-weight: bold; font-size: 15px; margin-bottom: 5px; color: #222; }
         .popup-desc { font-size: 12px; color: #555; margin-bottom: 10px; line-height: 1.4; }
         
-        /* 動畫圖與來源標註 */
         .anime-img-box { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 5px; }
         .anime-img-box img { width: 100%; height: 120px; object-fit: cover; display: block; }
         .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 10px; }
         .source-text a { color: #888; text-decoration: underline; }
         
-        /* 街景按鈕 */
         .sv-btn {
             display: flex; justify-content: center; align-items: center; gap: 8px;
             background: #4285F4; color: white; text-align: center; padding: 8px;
@@ -85,9 +80,10 @@
     <script>
         var map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
         
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // 這是最絕對安全的 OSM 底圖，強制加 https
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution: '© OpenStreetMap'
         }).addTo(map);
         
         L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -139,45 +135,46 @@
                     var customIcon = L.divIcon({
                         className: 'custom-icon',
                         html: `<div class="custom-icon-wrapper"><img src="${site.animeImg}" alt="icon" onerror="this.src='https://placehold.co/44x44/ccc/fff?text=?'"></div>`,
-                        iconSize: [44, 50],
-                        iconAnchor: [22, 50],
-                        popupAnchor: [0, -50]
+                        iconSize: [40, 46],
+                        iconAnchor: [20, 46],
+                        popupAnchor: [0, -46]
                     });
 
                     var marker = L.marker([site.lat, site.lng], { icon: customIcon });
-                    var streetViewUrl = `https://www.google.com/maps/search/?api=1&query=${site.lat},${site.lng}`;
+                    var streetViewUrl = \`https://www.google.com/maps/search/?api=1&query=\${site.lat},\${site.lng}\`;
 
-                    var popupContent = `
+                    var popupContent = \`
                         <div class="popup-header">
-                            ${site.anime}
-                            <span class="tag">EP: ${site.episode}</span>
+                            \${site.anime}
+                            <span class="tag">EP: \${site.episode}</span>
                         </div>
                         <div class="popup-body">
-                            <div class="popup-loc">${site.location}</div>
-                            <div class="popup-desc">${site.scene}</div>
+                            <div class="popup-loc">\${site.location}</div>
+                            <div class="popup-desc">\${site.scene}</div>
                             
                             <div class="anime-img-box">
-                                <img src="${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
+                                <img src="\${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
                             </div>
                             <div class="source-text">
-                                圖片來源: <a href="${site.sourceUrl}" target="_blank">${site.imageSource}</a>
+                                圖片來源: <a href="\${site.sourceUrl}" target="_blank">\${site.imageSource}</a>
                             </div>
 
-                            <a href="${streetViewUrl}" target="_blank" class="sv-btn">
+                            <a href="\${streetViewUrl}" target="_blank" class="sv-btn">
                                 🗺️ 開啟 Google 地圖查看實景
                             </a>
                         </div>
-                    `;
+                    \`;
                     marker.bindPopup(popupContent);
                     markerGroup.addLayer(marker);
                 }
             });
         }
 
-        filterMap();
-        
-        // 確保地圖在手機端正確計算尺寸
-        setTimeout(function(){ map.invalidateSize(); }, 500);
+        // 等待地圖載入後執行
+        setTimeout(function() {
+            filterMap();
+            map.invalidateSize();
+        }, 300);
     </script>
 </body>
 </html>
