@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>小二特製：動漫聖地巡禮地圖 (完美版)</title>
+    <title>小二特製：動漫聖地巡禮地圖 (愛心互動版)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <style>
@@ -24,18 +24,27 @@
         .popup-header { background: #e74c3c; color: white; padding: 8px 12px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
         .popup-header span.tag { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px; }
         .popup-body { padding: 12px; }
-        .popup-loc { font-weight: bold; font-size: 15px; margin-bottom: 5px; color: #222; }
         
-        /* 動畫圖與來源標註 (加上 referrerpolicy 防止防盜連) */
+        .title-like-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .popup-loc { font-weight: bold; font-size: 15px; color: #222; margin: 0; }
+        
+        /* 愛心按鈕樣式 */
+        .like-btn { 
+            display: flex; align-items: center; gap: 4px; 
+            background: #f1f1f1; border: none; border-radius: 15px; 
+            padding: 4px 8px; cursor: pointer; font-size: 12px; 
+            transition: all 0.2s; color: #555;
+        }
+        .like-btn.liked { background: #fee; color: #e74c3c; }
+        .like-icon { font-size: 14px; font-style: normal; }
+        .like-btn.liked .like-icon::before { content: '❤️'; }
+        .like-btn:not(.liked) .like-icon::before { content: '🤍'; }
+        
         .anime-img-box { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 0px; }
         .anime-img-box img { width: 100%; height: 140px; object-fit: cover; display: block; }
         .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 10px; margin-top: 3px; }
         .source-text a { color: #888; text-decoration: underline; }
-
-        /* 場景解說區塊 (放在圖片下方) */
         .popup-desc { font-size: 12px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff3f3; padding: 8px; border-left: 3px solid #e74c3c; border-radius: 0 4px 4px 0; }
-        
-        /* 街景按鈕 */
         .sv-btn { display: flex; justify-content: center; align-items: center; gap: 8px; background: #4285F4; color: white; text-align: center; padding: 8px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; }
     </style>
 </head>
@@ -52,6 +61,9 @@
 
         var markerGroup = L.layerGroup().addTo(map);
         var holyLands = [];
+        
+        // 計數器 API 命名空間
+        const API_NAMESPACE = "animemap_para_2026";
 
         fetch('anime_map_data.json?v=' + new Date().getTime())
             .then(r => r.json())
@@ -69,22 +81,53 @@
                 map.invalidateSize();
             });
 
+        // 讀取/寫入本機按讚紀錄 (防止重複按)
+        function getLikedSpots() {
+            return JSON.parse(localStorage.getItem('likedSpots') || '{}');
+        }
+        function setLikedSpot(spotId) {
+            let likes = getLikedSpots();
+            likes[spotId] = true;
+            localStorage.setItem('likedSpots', JSON.stringify(likes));
+        }
+
+        // 呼叫外部 API 處理按讚
+        window.handleLike = function(btnElement, spotId) {
+            let likes = getLikedSpots();
+            if (likes[spotId]) {
+                alert("您已經對這個景點按過讚囉！");
+                return;
+            }
+            
+            // 立即變更 UI
+            btnElement.classList.add('liked');
+            let countSpan = btnElement.querySelector('.like-count');
+            countSpan.innerText = parseInt(countSpan.innerText) + 1;
+            setLikedSpot(spotId);
+
+            // 送出到 CounterAPI 雲端儲存
+            fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${spotId}/up`)
+                .catch(err => console.error('按讚失敗:', err));
+        };
+
         function filterMap() {
             markerGroup.clearLayers();
             var selectedAnime = document.getElementById('anime-filter').value;
+            
             holyLands.forEach(function(site) {
                 if (selectedAnime === "all" || site.anime === selectedAnime) {
                     var customIcon = L.divIcon({
                         className: 'custom-icon',
-                        // 注意這裡加入了 referrerpolicy="no-referrer"
                         html: `<div class="custom-icon-wrapper"><img src="${site.animeImg}" alt="icon" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/44x44/ccc/fff?text=?'"></div>`,
                         iconSize: [40, 46], iconAnchor: [20, 46], popupAnchor: [0, -46]
                     });
 
                     var marker = L.marker([site.lat, site.lng], { icon: customIcon });
                     
-                    // 改用 cbll 參數強制開啟最近的街景視角
+                    // 用經緯度當作這景點的唯一 ID (去除小數點)
+                    var spotId = "spot_" + String(site.lat).replace('.','_') + "_" + String(site.lng).replace('.','_');
                     var streetViewUrl = `https://www.google.com/maps?layer=c&cbll=${site.lat},${site.lng}`;
+                    var isLiked = getLikedSpots()[spotId] ? 'liked' : '';
 
                     var popupContent = `
                         <div class="popup-header">
@@ -92,7 +135,12 @@
                             <span class="tag">${site.episode}</span>
                         </div>
                         <div class="popup-body">
-                            <div class="popup-loc">${site.location}</div>
+                            <div class="title-like-row">
+                                <div class="popup-loc">${site.location}</div>
+                                <button class="like-btn ${isLiked}" id="btn-${spotId}" onclick="handleLike(this, '${spotId}')">
+                                    <i class="like-icon"></i> <span class="like-count" id="count-${spotId}">...</span>
+                                </button>
+                            </div>
                             
                             <div class="anime-img-box">
                                 <img src="${site.animeImg}" alt="動畫場景" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=No+Image'">
@@ -108,6 +156,20 @@
                     `;
                     marker.bindPopup(popupContent);
                     markerGroup.addLayer(marker);
+                    
+                    // 綁定彈出事件來非同步抓取讚數
+                    marker.on('popupopen', function() {
+                        fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${spotId}/`)
+                            .then(r => r.json())
+                            .then(data => {
+                                let count = data.count || 0;
+                                document.getElementById(`count-${spotId}`).innerText = count;
+                            })
+                            .catch(err => {
+                                // 如果 API 找不到該 key，代表沒人按過讚，顯示 0
+                                document.getElementById(`count-${spotId}`).innerText = "0";
+                            });
+                    });
                 }
             });
         }
