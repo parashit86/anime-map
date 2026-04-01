@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>小二特製：動漫聖地巡禮地圖 (版權標註 & 街景版)</title>
+    <title>小二特製：動漫聖地巡禮地圖 (終極穩定版)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body { margin: 0; padding: 0; font-family: '微軟正黑體', sans-serif; background: #f0f0f0; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: '微軟正黑體', sans-serif; background: #e5e3df; overflow: hidden; }
         
         #controls {
             position: absolute;
             top: 15px;
-            left: 50px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 1000;
             background: rgba(255, 255, 255, 0.95);
-            padding: 12px 20px;
+            padding: 10px 15px;
             border-radius: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
-            gap: 15px;
-            backdrop-filter: blur(5px);
+            gap: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-sizing: border-box;
         }
-        #controls h3 { margin: 0; font-size: 16px; color: #333; }
-        select { font-size: 14px; padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; outline: none; cursor: pointer; }
-        #map { height: 100vh; width: 100vw; }
+        #controls h3 { margin: 0; font-size: 15px; color: #333; white-space: nowrap; }
+        select { font-size: 14px; padding: 6px 10px; border-radius: 20px; border: 1px solid #ddd; outline: none; cursor: pointer; flex-grow: 1; width: 100%; }
+        
+        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; }
         
         /* 圓形頭像標記 */
         .custom-icon-wrapper {
-            width: 44px; height: 44px; background: white; border-radius: 50%;
+            width: 40px; height: 40px; background: white; border-radius: 50%;
             border: 2px solid #e74c3c; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative;
         }
@@ -37,37 +41,37 @@
             content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
             border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #e74c3c;
         }
-        .custom-icon-wrapper img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .custom-icon-wrapper img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 
         /* 彈出視窗排版 */
         .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 12px; }
-        .leaflet-popup-content { margin: 0; width: 340px !important; }
-        .popup-header { background: #e74c3c; color: white; padding: 10px 15px; font-weight: bold; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .popup-header span.tag { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-        .popup-body { padding: 15px; }
-        .popup-loc { font-weight: bold; font-size: 16px; margin-bottom: 5px; color: #222; }
-        .popup-desc { font-size: 13px; color: #555; margin-bottom: 12px; line-height: 1.5; }
+        .leaflet-popup-content { margin: 0; width: 280px !important; }
+        @media (min-width: 400px) { .leaflet-popup-content { width: 320px !important; } }
+        
+        .popup-header { background: #e74c3c; color: white; padding: 8px 12px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .popup-header span.tag { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px; }
+        .popup-body { padding: 12px; }
+        .popup-loc { font-weight: bold; font-size: 15px; margin-bottom: 5px; color: #222; }
+        .popup-desc { font-size: 12px; color: #555; margin-bottom: 10px; line-height: 1.4; }
         
         /* 動畫圖與來源標註 */
         .anime-img-box { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 5px; }
-        .anime-img-box img { width: 100%; height: 140px; object-fit: cover; display: block; }
+        .anime-img-box img { width: 100%; height: 120px; object-fit: cover; display: block; }
         .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 10px; }
         .source-text a { color: #888; text-decoration: underline; }
         
         /* 街景按鈕 */
         .sv-btn {
             display: flex; justify-content: center; align-items: center; gap: 8px;
-            background: #4285F4; color: white; text-align: center; padding: 10px;
-            border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;
-            transition: background 0.2s;
+            background: #4285F4; color: white; text-align: center; padding: 8px;
+            border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;
         }
-        .sv-btn:hover { background: #357ae8; color: white; }
     </style>
 </head>
 <body>
 
     <div id="controls">
-        <h3>📍 聖地巡禮雷達</h3>
+        <h3>📍 聖地雷達</h3>
         <select id="anime-filter" onchange="filterMap()">
             <option value="all">所有作品</option>
             <option value="灌籃高手">🏀 灌籃高手</option>
@@ -78,13 +82,18 @@
     <div id="map"></div>
 
     <script>
-        var map = L.map('map', { zoomControl: false }).setView([38.0, 140.0], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(map);
+        var map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
+        
+        // 【終極殺招】：直接使用 Google Maps 的底圖伺服器！保證絕對連得上、不灰屏！
+        L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            attribution: '© Google Maps'
+        }).addTo(map);
+        
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         var markerGroup = L.layerGroup().addTo(map);
 
-        // 資料庫：新增 imageSource 與 sourceUrl，移除失效的實景圖
         var holyLands = [
             {
                 anime: "灌籃高手",
@@ -136,8 +145,6 @@
                     });
 
                     var marker = L.marker([site.lat, site.lng], { icon: customIcon });
-                    
-                    // 動態產生 Google 地圖的連結 (帶入經緯度)
                     var streetViewUrl = \`https://www.google.com/maps/search/?api=1&query=\${site.lat},\${site.lng}\`;
 
                     var popupContent = \`
@@ -149,7 +156,6 @@
                             <div class="popup-loc">\${site.location}</div>
                             <div class="popup-desc">\${site.scene}</div>
                             
-                            <!-- 動畫場景與來源標註 -->
                             <div class="anime-img-box">
                                 <img src="\${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=Image+Not+Found'">
                             </div>
@@ -157,7 +163,6 @@
                                 圖片來源: <a href="\${site.sourceUrl}" target="_blank">\${site.imageSource}</a>
                             </div>
 
-                            <!-- 街景按鈕 -->
                             <a href="\${streetViewUrl}" target="_blank" class="sv-btn">
                                 🗺️ 開啟 Google 地圖查看實景
                             </a>
@@ -170,6 +175,9 @@
         }
 
         filterMap();
+        
+        // 確保地圖在手機端正確計算尺寸
+        setTimeout(function(){ map.invalidateSize(); }, 500);
     </script>
 </body>
 </html>
