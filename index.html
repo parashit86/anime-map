@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>小二特製：動漫聖地巡禮地圖</title>
+    <title>小二特製：動漫聖地巡禮地圖 (對照版)</title>
     <!-- 引入 Leaflet 地圖引擎的 CSS 和 JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -22,42 +22,67 @@
         select { font-size: 16px; padding: 5px; }
         /* 地圖滿版顯示 */
         #map { height: 100vh; width: 100vw; }
+        
         /* 彈出視窗排版 */
-        .popup-title { font-weight: bold; color: #e74c3c; font-size: 16px; margin-bottom: 5px;}
-        .popup-loc { font-weight: bold; font-size: 14px; margin-bottom: 5px;}
-        .popup-desc { font-size: 13px; color: #555; }
+        .leaflet-popup-content { width: 320px !important; }
+        .popup-title { font-weight: bold; color: #e74c3c; font-size: 16px; margin-bottom: 5px; border-bottom: 1px solid #ddd; padding-bottom: 3px;}
+        .popup-loc { font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #333;}
+        .popup-desc { font-size: 13px; color: #555; margin-bottom: 10px; line-height: 1.4;}
+        
+        /* 左右對照圖排版 */
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-box {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding-bottom: 5px;
+            border: 1px solid #eee;
+        }
+        .image-box img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 控制面板：用來篩選動漫 -->
     <div id="controls">
-        <h3>🎌 動漫聖地巡禮雷達</h3>
+        <h3>🎌 動漫聖地巡禮雷達 (實景對照)</h3>
         <label for="anime-filter">選擇作品：</label>
         <select id="anime-filter" onchange="filterMap()">
             <option value="all">顯示全部</option>
             <option value="灌籃高手">灌籃高手 (Slam Dunk)</option>
             <option value="排球少年">排球少年!! (Haikyuu!!)</option>
+            <option value="你的名字">你的名字 (Your Name)</option>
+            <option value="K-ON！輕音部">K-ON！輕音部</option>
         </select>
     </div>
 
-    <!-- 地圖容器 -->
     <div id="map"></div>
 
     <script>
-        // 1. 建立地圖，中心點預設在日本
-        var map = L.map('map').setView([37.5, 138.0], 6);
+        var map = L.map('map').setView([36.5, 138.0], 5);
 
-        // 2. 載入免費的 OpenStreetMap 圖資
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // 用一個群組來管理地圖上的圖標
         var markerGroup = L.layerGroup().addTo(map);
 
-        // 3. 核心資料庫 (JSON 格式)
+        // 核心資料庫：加入更多景點，並新增 animeImg 和 realImg 圖片連結欄位
         var holyLands = [
             {
                 anime: "灌籃高手",
@@ -65,7 +90,9 @@
                 lat: 35.3065,
                 lng: 139.5020,
                 episode: "TV版 OP (片頭曲)",
-                scene: "櫻木花道與晴子在平交道兩端揮手的經典世紀畫面。背後就是波光粼粼的湘南海岸！"
+                scene: "櫻木花道與晴子在平交道兩端揮手的經典世紀畫面。背後就是波光粼粼的湘南海岸！",
+                animeImg: "https://placehold.co/400x300/e74c3c/white?text=Anime+Scene\n(Slam+Dunk)",
+                realImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Kamakurakōkōmae_Station_level_crossing.jpg/640px-Kamakurakōkōmae_Station_level_crossing.jpg"
             },
             {
                 anime: "排球少年",
@@ -73,19 +100,42 @@
                 lat: 40.3283,
                 lng: 141.4628,
                 episode: "全系列",
-                scene: "『烏野高中』的現實原型！不只學校，周邊還有日向和影山練球的河川敷，以及山口忠常去的嶋田超市原型都在這個鎮上。"
+                scene: "『烏野高中』的現實原型！不只學校，周邊還有日向和影山練球的河川敷，以及山口忠常去的嶋田超市原型。",
+                animeImg: "https://placehold.co/400x300/f39c12/white?text=Anime+Scene\n(Karasuno)",
+                realImg: "https://placehold.co/400x300/34495e/white?text=Real+Location\n(Karumai+High)"
             },
             {
                 anime: "排球少年",
-                location: "仙台市體育館 (Kamei Arena Sendai)",
+                location: "仙台市體育館 (Kamei Arena)",
                 lat: 38.2205,
                 lng: 140.8752,
                 episode: "第一季：宮城縣預選賽",
-                scene: "烏野高中參加宮城縣預選賽的超熱血比賽場地，也是對戰青葉城西的經典舞台！"
+                scene: "烏野高中參加宮城縣預選賽的超熱血比賽場地，也是對戰青葉城西的經典舞台！",
+                animeImg: "https://placehold.co/400x300/f39c12/white?text=Anime+Scene\n(Sendai+Gym)",
+                realImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Sendai_Gymnasium_2011.jpg/640px-Sendai_Gymnasium_2011.jpg"
+            },
+            {
+                anime: "你的名字",
+                location: "飛驒古川站 (岐阜縣)",
+                lat: 36.2365,
+                lng: 137.1866,
+                episode: "電影中段",
+                scene: "男主角瀧為了尋找三葉，搭車來到這裡，從天橋上俯瞰鐵道與列車停靠的經典畫面。",
+                animeImg: "https://placehold.co/400x300/3498db/white?text=Anime+Scene\n(Your+Name)",
+                realImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Hida-Furukawa_Station_20161014.jpg/640px-Hida-Furukawa_Station_20161014.jpg"
+            },
+            {
+                anime: "K-ON！輕音部",
+                location: "豐鄉小學校舊校舍 (滋賀縣)",
+                lat: 35.2023,
+                lng: 136.2403,
+                episode: "全系列",
+                scene: "主角群就讀的『櫻丘高中』原型！連輕音部的社辦、樓梯扶手上的烏龜銅像都100%還原，裡面還有粉絲朝聖專區。",
+                animeImg: "https://placehold.co/400x300/e67e22/white?text=Anime+Scene\n(K-ON!)",
+                realImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Toyosato_Elementary_School.jpg/640px-Toyosato_Elementary_School.jpg"
             }
         ];
 
-        // 4. 根據選擇的作品畫出圖標的函數
         function filterMap() {
             markerGroup.clearLayers();
             var selectedAnime = document.getElementById('anime-filter').value;
@@ -93,12 +143,24 @@
             holyLands.forEach(function(site) {
                 if (selectedAnime === "all" || site.anime === selectedAnime) {
                     var marker = L.marker([site.lat, site.lng]);
+                    
+                    // 組合出包含左右對照圖的 HTML
                     var popupContent = `
                         <div class="popup-title">🎬 ${site.anime}</div>
                         <div class="popup-loc">📍 ${site.location}</div>
                         <div class="popup-desc">
-                            <b>📺 出現集數：</b>${site.episode}<br><br>
+                            <b>📺 出現集數：</b>${site.episode}<br>
                             <b>📝 場景背景：</b>${site.scene}
+                        </div>
+                        <div class="image-container">
+                            <div class="image-box">
+                                <img src="${site.animeImg}" alt="動畫場景" onerror="this.src='https://placehold.co/400x300/ccc/fff?text=No+Image'">
+                                動畫場景
+                            </div>
+                            <div class="image-box">
+                                <img src="${site.realImg}" alt="實景照片" onerror="this.src='https://placehold.co/400x300/ccc/fff?text=No+Image'">
+                                現實實景
+                            </div>
                         </div>
                     `;
                     marker.bindPopup(popupContent);
@@ -107,7 +169,7 @@
             });
         }
 
-        // 網頁載入時先執行一次
+        // 初始化
         filterMap();
 
     </script>
