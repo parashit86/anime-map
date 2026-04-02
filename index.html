@@ -4,58 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src * data: blob:; connect-src *;">
-    <title>Japan Travel Zen Map (V7.0)</title>
-    
+    <title>Japan Travel Zen Map (V7.1)</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-
     <style>
-        :root {
-            --ruri-blue: #1E50A2;
-            --sakura-pink: #FEDFE1;
-            --uguisu-green: #838A2D;
-            --akane-red: #B7282E;
-            --washi-bg: #F9F8F4;
-            --text-main: #2C2C2C;
-        }
+        :root { --ruri-blue: #1E50A2; --sakura-pink: #FEDFE1; --uguisu-green: #838A2D; --akane-red: #B7282E; --washi-bg: #F9F8F4; --text-main: #2C2C2C; }
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Noto Sans TC', sans-serif; background: var(--washi-bg); overflow: hidden; color: var(--text-main); }
-        
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; }
-        
-        #controls {
-            position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000;
-            background: rgba(249, 248, 244, 0.95); padding: 15px 20px; border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px;
-            width: 90%; max-width: 450px; box-sizing: border-box; border-top: 4px solid var(--ruri-blue);
-            backdrop-filter: blur(8px); transition: all 0.3s ease;
-        }
-        
+        #controls { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(249, 248, 244, 0.95); padding: 15px 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 450px; box-sizing: border-box; border-top: 4px solid var(--ruri-blue); backdrop-filter: blur(8px); transition: all 0.3s ease; }
         .header-row { display: flex; justify-content: space-between; align-items: center; }
         h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 18px; color: var(--ruri-blue); }
-        
         .lang-switch { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; }
         select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; }
         
-        /* Marker Styles */
         .zen-marker { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--ruri-blue); background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative;}
         .zen-marker img { width: 100%; height: 100%; object-fit: cover; }
         .marker-badge { position: absolute; top: -5px; right: -5px; background: var(--akane-red); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; }
         
-        /* Popup Styles */
         .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); background: var(--washi-bg); }
         .leaflet-popup-content { margin: 0; width: 300px !important; }
         .popup-header { background: var(--ruri-blue); color: #fff; padding: 10px 15px; font-family: 'Noto Serif JP', serif; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between;}
         .popup-body { padding: 15px; }
         .popup-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); border-bottom: 1px solid #ddd; padding-bottom: 5px;}
         .popup-img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
-        .popup-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 15px; }
+        .popup-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 15px; max-height: 100px; overflow-y: auto; background: #fff; padding: 8px; border-left: 3px solid var(--ruri-blue);}
         
         .btn-action { display: block; width: 100%; text-align: center; background: var(--uguisu-green); color: white; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; transition: opacity 0.2s; border: none; cursor: pointer;}
         .btn-action:hover { opacity: 0.9; }
         .btn-like { background: #fff; border: 1px solid #ddd; color: var(--akane-red); margin-bottom: 10px;}
         .btn-like.liked { background: var(--sakura-pink); border-color: var(--akane-red); }
+        .sv-warning { font-size: 11px; color: #999; text-align: center; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -84,9 +64,9 @@
 
     <script>
         const i18n = {
-            zh: { title: "🇯🇵 日本深度導覽地圖", catAll: "🌸 所有分類", catAnime: "🎬 動漫聖地", catHistory: "🏯 歷史古蹟", catNature: "🌲 大自然", catGourmet: "🍣 在地美食", routeNone: "🗺️ 自由探索", svBtn: "開啟 Google 街景", likeBtn: "按讚推薦", liked: "已推薦" },
-            en: { title: "🇯🇵 Japan Zen Travel Map", catAll: "🌸 All Categories", catAnime: "🎬 Anime", catHistory: "🏯 History", catNature: "🌲 Nature", catGourmet: "🍣 Gourmet", routeNone: "🗺️ Free Explore", svBtn: "Open Street View", likeBtn: "Recommend", liked: "Recommended" },
-            ja: { title: "🇯🇵 日本深掘りマップ", catAll: "🌸 すべて", catAnime: "🎬 アニメ聖地", catHistory: "🏯 歴史・史跡", catNature: "🌲 自然・絶景", catGourmet: "🍣 ご当地グルメ", routeNone: "🗺️ 自由探索", svBtn: "ストリートビュー", likeBtn: "いいね", liked: "おすすめ済" }
+            zh: { title: "🇯🇵 日本深度導覽地圖", catAll: "🌸 所有分類", catAnime: "🎬 動漫聖地", catHistory: "🏯 歷史古蹟", catNature: "🌲 大自然", catGourmet: "🍣 在地美食", routeNone: "🗺️ 自由探索", svBtn: "強制降落 Google 街景", likeBtn: "按讚推薦", liked: "已推薦" },
+            en: { title: "🇯🇵 Japan Zen Travel Map", catAll: "🌸 All Categories", catAnime: "🎬 Anime", catHistory: "🏯 History", catNature: "🌲 Nature", catGourmet: "🍣 Gourmet", routeNone: "🗺️ Free Explore", svBtn: "Force Street View", likeBtn: "Recommend", liked: "Recommended" },
+            ja: { title: "🇯🇵 日本深掘りマップ", catAll: "🌸 すべて", catAnime: "🎬 アニメ聖地", catHistory: "🏯 歴史・史跡", catNature: "🌲 自然・絶景", catGourmet: "🍣 ご当地グルメ", routeNone: "🗺️ 自由探索", svBtn: "ストリートビュー強制起動", likeBtn: "いいね", liked: "おすすめ済" }
         };
 
         let currentLang = 'zh';
@@ -107,8 +87,6 @@
             document.getElementById('t-cat-nature').innerText = i18n[currentLang].catNature;
             document.getElementById('t-cat-gourmet').innerText = i18n[currentLang].catGourmet;
             document.getElementById('t-route-none').innerText = i18n[currentLang].routeNone;
-            
-            // Update route names
             const routeOpt = document.getElementById('t-route-gifu');
             if(routeOpt && mapData.itineraries[0]) {
                 const r = mapData.itineraries[0];
@@ -148,7 +126,6 @@
                             routeCoords.push([poi.lat, poi.lng]);
                         }
                     });
-                    // Draw Polyline
                     routePolyline = L.polyline(routeCoords, { color: '#B7282E', weight: 4, dashArray: '5, 10' }).addTo(map);
                     map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
                 }
@@ -159,25 +136,37 @@
 
             displayPois.forEach(poi => {
                 const name = currentLang === 'en' ? poi.name_en : currentLang === 'ja' ? poi.name_ja : poi.name_zh;
-                const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated)' : poi.desc_zh; // Mock translation
+                const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated)' : poi.desc_zh;
                 
                 const badgeHtml = poi.routeIndex ? `<div class="marker-badge">${poi.routeIndex}</div>` : '';
+                // 關鍵修復 1: 加入 referrerpolicy="no-referrer"
                 const customIcon = L.divIcon({
                     className: 'zen-custom-icon',
-                    html: `${badgeHtml}<div class="zen-marker"><img src="${DOMPurify.sanitize(poi.img)}" onerror="this.src='https://placehold.co/40x40/ccc/fff'"></div>`,
+                    html: `${badgeHtml}<div class="zen-marker"><img src="${DOMPurify.sanitize(poi.img)}" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/40x40/ccc/fff'"></div>`,
                     iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -25]
                 });
 
-                const svUrl = DOMPurify.sanitize(`https://www.google.com/maps?layer=c&cbll=${poi.lat},${poi.lng}`);
+                // 關鍵修復 2: 官方強制開啟街景 API 語法 (如果全黑代表該點無街景車進入)
+                const svUrl = DOMPurify.sanitize(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${poi.lat},${poi.lng}`);
                 const safeId = DOMPurify.sanitize(poi.id);
 
+                // 加入劇情標示
+                const episodeTag = poi.episode ? `<span class="tag">${DOMPurify.sanitize(poi.episode)}</span>` : '';
+
                 const popupHtml = `
-                    <div class="popup-header"><span>${DOMPurify.sanitize(name)}</span></div>
+                    <div class="popup-header"><span>${DOMPurify.sanitize(name)}</span>${episodeTag}</div>
                     <div class="popup-body">
-                        <img class="popup-img" src="${DOMPurify.sanitize(poi.img)}">
-                        <div class="popup-desc">${DOMPurify.sanitize(desc)}</div>
+                        <!-- 關鍵修復 1: 加入 referrerpolicy="no-referrer" -->
+                        <img class="popup-img" src="${DOMPurify.sanitize(poi.img)}" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=No+Image'">
+                        
+                        <!-- 動漫背景說明區塊 -->
+                        <div class="popup-desc"><b>📖 景點解說：</b><br>${DOMPurify.sanitize(desc)}</div>
+                        
                         <button class="btn-action btn-like" onclick="handleLike(this, '${safeId}')">🤍 ${i18n[currentLang].likeBtn}</button>
+                        
+                        <!-- 關鍵修復 2: 強制街景按鈕 -->
                         <a href="${svUrl}" target="_blank" class="btn-action">🗺️ ${i18n[currentLang].svBtn}</a>
+                        <div class="sv-warning">*(若全黑代表該點無街景車影像)</div>
                     </div>
                 `;
                 L.marker([poi.lat, poi.lng], { icon: customIcon }).bindPopup(popupHtml).addTo(markerGroup);
