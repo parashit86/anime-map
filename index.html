@@ -3,174 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>小二特製：動漫聖地巡禮地圖 (愛心互動版)</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src * data: blob:; connect-src *;">
+    <title>Japan Travel Zen Map (V7.0)</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
     <style>
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: '微軟正黑體', sans-serif; background: #e5e3df; overflow: hidden; }
-        #controls { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(255, 255, 255, 0.95); padding: 10px 15px; border-radius: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; width: 90%; max-width: 400px; box-sizing: border-box; }
-        #controls h3 { margin: 0; font-size: 15px; color: #333; white-space: nowrap; }
-        select { font-size: 14px; padding: 6px 10px; border-radius: 20px; border: 1px solid #ddd; outline: none; cursor: pointer; flex-grow: 1; width: 100%; }
+        :root {
+            --ruri-blue: #1E50A2;
+            --sakura-pink: #FEDFE1;
+            --uguisu-green: #838A2D;
+            --akane-red: #B7282E;
+            --washi-bg: #F9F8F4;
+            --text-main: #2C2C2C;
+        }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Noto Sans TC', sans-serif; background: var(--washi-bg); overflow: hidden; color: var(--text-main); }
+        
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; }
         
-        .custom-icon-wrapper { width: 40px; height: 40px; background: white; border-radius: 50%; border: 2px solid #e74c3c; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
-        .custom-icon-wrapper::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #e74c3c; }
-        .custom-icon-wrapper img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
-
-        .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 12px; }
-        .leaflet-popup-content { margin: 0; width: 280px !important; }
-        @media (min-width: 400px) { .leaflet-popup-content { width: 320px !important; } }
-        
-        .popup-header { background: #e74c3c; color: white; padding: 8px 12px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .popup-header span.tag { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px; }
-        .popup-body { padding: 12px; }
-        
-        .title-like-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .popup-loc { font-weight: bold; font-size: 15px; color: #222; margin: 0; }
-        
-        /* 愛心按鈕樣式 */
-        .like-btn { 
-            display: flex; align-items: center; gap: 4px; 
-            background: #f1f1f1; border: none; border-radius: 15px; 
-            padding: 4px 8px; cursor: pointer; font-size: 12px; 
-            transition: all 0.2s; color: #555;
+        #controls {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000;
+            background: rgba(249, 248, 244, 0.95); padding: 15px 20px; border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px;
+            width: 90%; max-width: 450px; box-sizing: border-box; border-top: 4px solid var(--ruri-blue);
+            backdrop-filter: blur(8px); transition: all 0.3s ease;
         }
-        .like-btn.liked { background: #fee; color: #e74c3c; }
-        .like-icon { font-size: 14px; font-style: normal; }
-        .like-btn.liked .like-icon::before { content: '❤️'; }
-        .like-btn:not(.liked) .like-icon::before { content: '🤍'; }
         
-        .anime-img-box { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 0px; }
-        .anime-img-box img { width: 100%; height: 140px; object-fit: cover; display: block; }
-        .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 10px; margin-top: 3px; }
-        .source-text a { color: #888; text-decoration: underline; }
-        .popup-desc { font-size: 12px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff3f3; padding: 8px; border-left: 3px solid #e74c3c; border-radius: 0 4px 4px 0; }
-        .sv-btn { display: flex; justify-content: center; align-items: center; gap: 8px; background: #4285F4; color: white; text-align: center; padding: 8px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; }
+        h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 18px; color: var(--ruri-blue); }
+        
+        .lang-switch { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; }
+        select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; }
+        
+        /* Marker Styles */
+        .zen-marker { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--ruri-blue); background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative;}
+        .zen-marker img { width: 100%; height: 100%; object-fit: cover; }
+        .marker-badge { position: absolute; top: -5px; right: -5px; background: var(--akane-red); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        
+        /* Popup Styles */
+        .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); background: var(--washi-bg); }
+        .leaflet-popup-content { margin: 0; width: 300px !important; }
+        .popup-header { background: var(--ruri-blue); color: #fff; padding: 10px 15px; font-family: 'Noto Serif JP', serif; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between;}
+        .popup-body { padding: 15px; }
+        .popup-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); border-bottom: 1px solid #ddd; padding-bottom: 5px;}
+        .popup-img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
+        .popup-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 15px; }
+        
+        .btn-action { display: block; width: 100%; text-align: center; background: var(--uguisu-green); color: white; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; transition: opacity 0.2s; border: none; cursor: pointer;}
+        .btn-action:hover { opacity: 0.9; }
+        .btn-like { background: #fff; border: 1px solid #ddd; color: var(--akane-red); margin-bottom: 10px;}
+        .btn-like.liked { background: var(--sakura-pink); border-color: var(--akane-red); }
     </style>
 </head>
 <body>
     <div id="controls">
-        <h3>📍 聖地雷達</h3>
-        <select id="anime-filter" onchange="filterMap()"><option value="all">載入中...</option></select>
+        <div class="header-row">
+            <h3 id="t-title">🇯🇵 日本深度導覽地圖</h3>
+            <select class="lang-switch" id="lang-select" onchange="changeLang()">
+                <option value="zh">繁體中文</option>
+                <option value="en">English</option>
+                <option value="ja">日本語</option>
+            </select>
+        </div>
+        <select id="cat-filter" onchange="renderMap()">
+            <option value="all" id="t-cat-all">🌸 所有分類 (All Categories)</option>
+            <option value="anime" id="t-cat-anime">🎬 動漫聖地 (Anime Pilgrimages)</option>
+            <option value="history" id="t-cat-history">🏯 歷史古蹟 (Historical Sites)</option>
+            <option value="nature" id="t-cat-nature">🌲 大自然絕景 (Nature & Seasons)</option>
+            <option value="gourmet" id="t-cat-gourmet">🍣 在地美食 (Gourmet)</option>
+        </select>
+        <select id="route-filter" onchange="renderMap()">
+            <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore)</option>
+            <option value="tour_gifu_3day" id="t-route-gifu">🚗 岐阜 3 日自駕：動漫與和牛</option>
+        </select>
     </div>
     <div id="map"></div>
+
     <script>
-        var map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
+        const i18n = {
+            zh: { title: "🇯🇵 日本深度導覽地圖", catAll: "🌸 所有分類", catAnime: "🎬 動漫聖地", catHistory: "🏯 歷史古蹟", catNature: "🌲 大自然", catGourmet: "🍣 在地美食", routeNone: "🗺️ 自由探索", svBtn: "開啟 Google 街景", likeBtn: "按讚推薦", liked: "已推薦" },
+            en: { title: "🇯🇵 Japan Zen Travel Map", catAll: "🌸 All Categories", catAnime: "🎬 Anime", catHistory: "🏯 History", catNature: "🌲 Nature", catGourmet: "🍣 Gourmet", routeNone: "🗺️ Free Explore", svBtn: "Open Street View", likeBtn: "Recommend", liked: "Recommended" },
+            ja: { title: "🇯🇵 日本深掘りマップ", catAll: "🌸 すべて", catAnime: "🎬 アニメ聖地", catHistory: "🏯 歴史・史跡", catNature: "🌲 自然・絶景", catGourmet: "🍣 ご当地グルメ", routeNone: "🗺️ 自由探索", svBtn: "ストリートビュー", likeBtn: "いいね", liked: "おすすめ済" }
+        };
+
+        let currentLang = 'zh';
+        let mapData = { pois: [], itineraries: [] };
+        let map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
         L.tileLayer('https://mt0.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps' }).addTo(map);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        var markerGroup = L.layerGroup().addTo(map);
-        var holyLands = [];
-        
-        // 計數器 API 命名空間
-        const API_NAMESPACE = "animemap_para_2026";
+        let markerGroup = L.layerGroup().addTo(map);
+        let routePolyline = null;
 
-        fetch('anime_map_data.json?v=' + new Date().getTime())
-            .then(r => r.json())
-            .then(data => {
-                holyLands = data;
-                var filterSelect = document.getElementById('anime-filter');
-                var uniqueAnimes = [...new Set(data.map(item => item.anime))];
-                filterSelect.innerHTML = '<option value="all">所有作品</option>';
-                uniqueAnimes.forEach(anime => {
-                    var option = document.createElement('option');
-                    option.value = anime; option.textContent = '🎬 ' + anime;
-                    filterSelect.appendChild(option);
-                });
-                filterMap();
-                map.invalidateSize();
-            });
-
-        // 讀取/寫入本機按讚紀錄 (防止重複按)
-        function getLikedSpots() {
-            return JSON.parse(localStorage.getItem('likedSpots') || '{}');
-        }
-        function setLikedSpot(spotId) {
-            let likes = getLikedSpots();
-            likes[spotId] = true;
-            localStorage.setItem('likedSpots', JSON.stringify(likes));
-        }
-
-        // 呼叫外部 API 處理按讚
-        window.handleLike = function(btnElement, spotId) {
-            let likes = getLikedSpots();
-            if (likes[spotId]) {
-                alert("您已經對這個景點按過讚囉！");
-                return;
+        function changeLang() {
+            currentLang = document.getElementById('lang-select').value;
+            document.getElementById('t-title').innerText = i18n[currentLang].title;
+            document.getElementById('t-cat-all').innerText = i18n[currentLang].catAll;
+            document.getElementById('t-cat-anime').innerText = i18n[currentLang].catAnime;
+            document.getElementById('t-cat-history').innerText = i18n[currentLang].catHistory;
+            document.getElementById('t-cat-nature').innerText = i18n[currentLang].catNature;
+            document.getElementById('t-cat-gourmet').innerText = i18n[currentLang].catGourmet;
+            document.getElementById('t-route-none').innerText = i18n[currentLang].routeNone;
+            
+            // Update route names
+            const routeOpt = document.getElementById('t-route-gifu');
+            if(routeOpt && mapData.itineraries[0]) {
+                const r = mapData.itineraries[0];
+                routeOpt.innerText = currentLang === 'en' ? '🚗 ' + r.name_en : currentLang === 'ja' ? '🚗 ' + r.name_ja : '🚗 ' + r.name_zh;
             }
-            
-            // 立即變更 UI
-            btnElement.classList.add('liked');
-            let countSpan = btnElement.querySelector('.like-count');
-            countSpan.innerText = parseInt(countSpan.innerText) + 1;
-            setLikedSpot(spotId);
+            renderMap();
+        }
 
-            // 送出到 CounterAPI 雲端儲存
-            fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${spotId}/up`)
-                .catch(err => console.error('按讚失敗:', err));
-        };
+        fetch('anime_map_data.json?v=' + Date.now())
+            .then(r => r.json())
+            .then(data => { mapData = data; changeLang(); });
 
-        function filterMap() {
+        function handleLike(btn, id) {
+            btn.classList.add('liked');
+            btn.innerHTML = `❤️ ${i18n[currentLang].liked}`;
+            fetch(`https://api.counterapi.dev/v1/animemap_v7_para/${id}/up`).catch(()=>{});
+        }
+
+        function renderMap() {
             markerGroup.clearLayers();
-            var selectedAnime = document.getElementById('anime-filter').value;
+            if (routePolyline) map.removeLayer(routePolyline);
+
+            const catFilter = document.getElementById('cat-filter').value;
+            const routeFilter = document.getElementById('route-filter').value;
             
-            holyLands.forEach(function(site) {
-                if (selectedAnime === "all" || site.anime === selectedAnime) {
-                    var customIcon = L.divIcon({
-                        className: 'custom-icon',
-                        html: `<div class="custom-icon-wrapper"><img src="${site.animeImg}" alt="icon" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/44x44/ccc/fff?text=?'"></div>`,
-                        iconSize: [40, 46], iconAnchor: [20, 46], popupAnchor: [0, -46]
+            let displayPois = [];
+            let routeCoords = [];
+
+            if (routeFilter !== "none") {
+                const itinerary = mapData.itineraries.find(i => i.id === routeFilter);
+                if (itinerary) {
+                    itinerary.route.forEach((poiId, index) => {
+                        const poi = mapData.pois.find(p => p.id === poiId);
+                        if (poi) {
+                            poi.routeIndex = index + 1;
+                            displayPois.push(poi);
+                            routeCoords.push([poi.lat, poi.lng]);
+                        }
                     });
-
-                    var marker = L.marker([site.lat, site.lng], { icon: customIcon });
-                    
-                    // 用經緯度當作這景點的唯一 ID (去除小數點)
-                    var spotId = "spot_" + String(site.lat).replace('.','_') + "_" + String(site.lng).replace('.','_');
-                    var streetViewUrl = `https://www.google.com/maps?layer=c&cbll=${site.lat},${site.lng}`;
-                    var isLiked = getLikedSpots()[spotId] ? 'liked' : '';
-
-                    var popupContent = `
-                        <div class="popup-header">
-                            ${site.anime}
-                            <span class="tag">${site.episode}</span>
-                        </div>
-                        <div class="popup-body">
-                            <div class="title-like-row">
-                                <div class="popup-loc">${site.location}</div>
-                                <button class="like-btn ${isLiked}" id="btn-${spotId}" onclick="handleLike(this, '${spotId}')">
-                                    <i class="like-icon"></i> <span class="like-count" id="count-${spotId}">...</span>
-                                </button>
-                            </div>
-                            
-                            <div class="anime-img-box">
-                                <img src="${site.animeImg}" alt="動畫場景" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=No+Image'">
-                            </div>
-                            <div class="source-text">圖片來源: <a href="${site.sourceUrl}" target="_blank">${site.imageSource}</a></div>
-                            
-                            <div class="popup-desc"><b>📖 場景解說：</b><br>${site.scene}</div>
-
-                            <a href="${streetViewUrl}" target="_blank" class="sv-btn">
-                                🗺️ 開啟 Google 360° 街景比對
-                            </a>
-                        </div>
-                    `;
-                    marker.bindPopup(popupContent);
-                    markerGroup.addLayer(marker);
-                    
-                    // 綁定彈出事件來非同步抓取讚數
-                    marker.on('popupopen', function() {
-                        fetch(`https://api.counterapi.dev/v1/${API_NAMESPACE}/${spotId}/`)
-                            .then(r => r.json())
-                            .then(data => {
-                                let count = data.count || 0;
-                                document.getElementById(`count-${spotId}`).innerText = count;
-                            })
-                            .catch(err => {
-                                // 如果 API 找不到該 key，代表沒人按過讚，顯示 0
-                                document.getElementById(`count-${spotId}`).innerText = "0";
-                            });
-                    });
+                    // Draw Polyline
+                    routePolyline = L.polyline(routeCoords, { color: '#B7282E', weight: 4, dashArray: '5, 10' }).addTo(map);
+                    map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
                 }
+            } else {
+                displayPois = mapData.pois.filter(p => catFilter === "all" || p.category === catFilter);
+                displayPois.forEach(p => p.routeIndex = null);
+            }
+
+            displayPois.forEach(poi => {
+                const name = currentLang === 'en' ? poi.name_en : currentLang === 'ja' ? poi.name_ja : poi.name_zh;
+                const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated)' : poi.desc_zh; // Mock translation
+                
+                const badgeHtml = poi.routeIndex ? `<div class="marker-badge">${poi.routeIndex}</div>` : '';
+                const customIcon = L.divIcon({
+                    className: 'zen-custom-icon',
+                    html: `${badgeHtml}<div class="zen-marker"><img src="${DOMPurify.sanitize(poi.img)}" onerror="this.src='https://placehold.co/40x40/ccc/fff'"></div>`,
+                    iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -25]
+                });
+
+                const svUrl = DOMPurify.sanitize(`https://www.google.com/maps?layer=c&cbll=${poi.lat},${poi.lng}`);
+                const safeId = DOMPurify.sanitize(poi.id);
+
+                const popupHtml = `
+                    <div class="popup-header"><span>${DOMPurify.sanitize(name)}</span></div>
+                    <div class="popup-body">
+                        <img class="popup-img" src="${DOMPurify.sanitize(poi.img)}">
+                        <div class="popup-desc">${DOMPurify.sanitize(desc)}</div>
+                        <button class="btn-action btn-like" onclick="handleLike(this, '${safeId}')">🤍 ${i18n[currentLang].likeBtn}</button>
+                        <a href="${svUrl}" target="_blank" class="btn-action">🗺️ ${i18n[currentLang].svBtn}</a>
+                    </div>
+                `;
+                L.marker([poi.lat, poi.lng], { icon: customIcon }).bindPopup(popupHtml).addTo(markerGroup);
             });
         }
     </script>
