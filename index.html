@@ -116,7 +116,17 @@
         .drag-handle:active { cursor: grabbing; }
         
         #controls .header-row { padding-bottom: 5px; margin-bottom: 5px; border-bottom: 1px solid #eaeaea; }
-</style>
+
+        #controls { transition: all 0.3s ease; transform-origin: top center; overflow: hidden; }
+        #controls.collapsed { 
+            width: 56px !important; height: 56px !important; padding: 0 !important;
+            border-radius: 28px !important; background: var(--ruri-blue); 
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        #controls.collapsed > * { display: none !important; }
+        .minimized-icon { display: none; color: white; font-size: 24px; pointer-events: none; }
+        #controls.collapsed .minimized-icon { display: block !important; }
+    </style>
 </head>
 <body>
     <div id="controls" class="expanded">
@@ -134,7 +144,7 @@
                     <option value="en">English</option>
                     <option value="ja">日本語</option>
                 </select>
-                <button class="toggle-btn" onclick="toggleControls()" id="toggle-icon" style="background:#f0f0f0; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center;">🔽</button>
+                <button class="toggle-btn" onclick="toggleControls(event)" id="toggle-icon" style="background:#f0f0f0; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center;">🔽</button>
             </div>
         </div>
         <div id="filter-container">
@@ -162,13 +172,16 @@
 
         let currentLang = 'zh';
         let isCollapsed = false;
-        function toggleControls() {
+        function toggleControls(e) {
+            if (e) e.stopPropagation();
             const controls = document.getElementById('controls');
             isCollapsed = !isCollapsed;
             if(isCollapsed) {
-                controls.classList.remove('expanded');
                 controls.classList.add('collapsed');
             } else {
+                controls.classList.remove('collapsed');
+            }
+        } else {
                 controls.classList.remove('collapsed');
                 controls.classList.add('expanded');
             }
@@ -184,6 +197,11 @@
 
         let markerGroup = L.layerGroup().addTo(map);
         let routePolyline = null;
+
+        document.getElementById('controls').addEventListener('click', function(e) {
+            if (isCollapsed) toggleControls();
+        });
+    
 
         function changeLang() {
             currentLang = document.getElementById('lang-select').value;
@@ -272,11 +290,16 @@
                 const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated)' : poi.desc_zh;
                 
                 const badgeHtml = poi.routeIndex ? `<div class="marker-badge">${poi.routeIndex}</div>` : '';
-                const imgUrl = poi.img || poi.animeImg || 'https://placehold.co/400x200/ccc/fff?text=Image';
+                let imgUrl = poi.img || poi.animeImg;
+                if (!imgUrl || imgUrl === 'null' || imgUrl.includes('undefined')) {
+                    imgUrl = 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&q=80';
+                }
+                const safeImgUrl = DOMPurify.sanitize(imgUrl);
+                const fallbackImg = 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&q=80';
                 
                 const customIcon = L.divIcon({
                     className: 'zen-custom-icon',
-                    html: `${badgeHtml}<div class="zen-marker"><img src="${DOMPurify.sanitize(imgUrl)}" referrerpolicy="no-referrer" onerror="this.src='https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=100&q=80'"></div>`,
+                    html: `${badgeHtml}<div class="zen-marker"><img src="${safeImgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';"></div>`,
                     iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -25]
                 });
 
@@ -300,7 +323,7 @@
                         </div>
 
                         <div class="anime-img-box">
-                            <img class="popup-img" src="${DOMPurify.sanitize(imgUrl)}" referrerpolicy="no-referrer" onerror="this.src='https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=100&q=80'">
+                            <img class="popup-img" src="${safeImgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';">
                         </div>
                         <div class="source-text">圖片來源: <a href="${DOMPurify.sanitize(poi.sourceUrl||'#')}" target="_blank">${DOMPurify.sanitize(poi.imageSource||'網路')}</a></div>
                         
