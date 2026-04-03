@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src * data: blob:; connect-src *;">
-    <title>Japan Travel Zen Map (V8.0)</title>
+    <title>Japan Travel Zen Map (V10.0)</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -17,7 +17,7 @@
         .header-row { display: flex; justify-content: space-between; align-items: center; }
         h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 18px; color: var(--ruri-blue); }
         .lang-switch { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; }
-        select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; }
+        select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; width: 100%;}
         
         .zen-marker { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--ruri-blue); background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative;}
         .zen-marker img { width: 100%; height: 100%; object-fit: cover; }
@@ -30,7 +30,6 @@
         .popup-body { padding: 15px; }
         .popup-loc { font-weight: 700; font-size: 17px; margin-bottom: 4px; color: #222; }
         
-        /* 星星評價區塊 */
         .rating-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 13px; font-weight: 500; color: #555; }
         .stars { color: var(--gold-star); letter-spacing: 1px; font-size: 14px;}
         
@@ -38,12 +37,9 @@
         .anime-img-box img { width: 100%; height: 150px; object-fit: cover; display: block; }
         .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 12px; margin-top: 4px; }
         .source-text a { color: #888; text-decoration: underline; }
-        
-        /* 說明與評論區塊 */
         .popup-desc { font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff; padding: 10px; border-left: 3px solid var(--ruri-blue); border-radius: 0 4px 4px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
         .popup-review { font-size: 12px; color: #666; font-style: italic; background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 15px; display: flex; gap: 8px; align-items: flex-start;}
         
-        /* 按鈕群組 */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         .btn-action { display: flex; justify-content: center; align-items: center; gap: 5px; width: 100%; text-align: center; color: white; padding: 10px 5px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; transition: opacity 0.2s; border: none; cursor: pointer;}
         .btn-action:hover { opacity: 0.9; }
@@ -73,8 +69,8 @@
         </select>
         <select id="route-filter" onchange="renderMap()">
             <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore)</option>
-<!-- Routes injected dynamically -->
-</select>
+            <!-- Routes injected by JS -->
+        </select>
     </div>
     <div id="map"></div>
 
@@ -102,41 +98,41 @@
             document.getElementById('t-cat-history').innerText = i18n[currentLang].catHistory;
             document.getElementById('t-cat-nature').innerText = i18n[currentLang].catNature;
             document.getElementById('t-cat-gourmet').innerText = i18n[currentLang].catGourmet;
-            document.getElementById('t-route-none').innerText = i18n[currentLang].routeNone;
             
-            // Dynamically update routes
+            // Build Route Dropdown
             const routeFilter = document.getElementById('route-filter');
-            // Keep the first option
-            const firstOpt = routeFilter.options[0];
-            routeFilter.innerHTML = '';
-            routeFilter.appendChild(firstOpt);
+            const currentVal = routeFilter.value;
+            routeFilter.innerHTML = `<option value="none" id="t-route-none">${i18n[currentLang].routeNone}</option>`;
             
-            mapData.itineraries.forEach(r => {
-                const opt = document.createElement('option');
-                opt.value = r.id;
-                opt.innerText = '🚗 ' + (currentLang === 'en' ? r.name_en : currentLang === 'ja' ? r.name_ja : r.name_zh);
-                // retain selection
-                if (window.lastSelectedRoute === r.id) opt.selected = true;
-                routeFilter.appendChild(opt);
-            });
-
-// const routeOpt
-            if(routeOpt && mapData.itineraries[0]) {
-                const r = mapData.itineraries[0];
-                routeOpt.innerText = currentLang === 'en' ? '🚗 ' + r.name_en : currentLang === 'ja' ? '🚗 ' + r.name_ja : '🚗 ' + r.name_zh;
+            if (mapData.itineraries && mapData.itineraries.length > 0) {
+                mapData.itineraries.forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.innerText = '🚗 ' + (currentLang === 'en' ? (r.name_en||r.name_zh) : currentLang === 'ja' ? (r.name_ja||r.name_zh) : r.name_zh);
+                    if (r.id === currentVal) opt.selected = true;
+                    routeFilter.appendChild(opt);
+                });
             }
             renderMap();
         }
 
         fetch('anime_map_data.json?v=' + Date.now())
             .then(r => r.json())
-            .then(data => { mapData = data; changeLang(); });
+            .then(data => { 
+                mapData = data; 
+                
+                // Dynamically populate anime filter if needed, or just let 'all' handle it.
+                // We'll keep the static categories for now.
+                
+                changeLang(); 
+            })
+            .catch(e => console.error("Error loading map data:", e));
 
         function handleLike(btn, id) {
             btn.classList.add('liked');
             let countSpan = btn.querySelector('.l-count');
-            countSpan.innerText = parseInt(countSpan.innerText) + 1;
-            fetch(`https://api.counterapi.dev/v1/animemap_v8_para/${id}/up`).catch(()=>{});
+            if (countSpan) countSpan.innerText = parseInt(countSpan.innerText) + 1;
+            fetch(`https://api.counterapi.dev/v1/animemap_v10_para/${id}/up`).catch(()=>{});
         }
         
         function getStars(rating) {
@@ -151,7 +147,6 @@
 
             const catFilter = document.getElementById('cat-filter').value;
             const routeFilter = document.getElementById('route-filter').value;
-window.lastSelectedRoute = routeFilter;
             
             let displayPois = [];
             let routeCoords = [];
@@ -167,8 +162,10 @@ window.lastSelectedRoute = routeFilter;
                             routeCoords.push([poi.lat, poi.lng]);
                         }
                     });
-                    routePolyline = L.polyline(routeCoords, { color: '#B7282E', weight: 4, dashArray: '5, 10' }).addTo(map);
-                    map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
+                    if (routeCoords.length > 0) {
+                        routePolyline = L.polyline(routeCoords, { color: '#B7282E', weight: 4, dashArray: '5, 10' }).addTo(map);
+                        map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
+                    }
                 }
             } else {
                 displayPois = mapData.pois.filter(p => catFilter === "all" || p.category === catFilter || (p.anime && catFilter === 'anime'));
@@ -180,41 +177,40 @@ window.lastSelectedRoute = routeFilter;
                 const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated)' : poi.desc_zh;
                 
                 const badgeHtml = poi.routeIndex ? `<div class="marker-badge">${poi.routeIndex}</div>` : '';
+                const imgUrl = poi.img || poi.animeImg || 'https://placehold.co/400x200/ccc/fff?text=Image';
+                
                 const customIcon = L.divIcon({
                     className: 'zen-custom-icon',
-                    html: `${badgeHtml}<div class="zen-marker"><img src="${DOMPurify.sanitize(poi.img || poi.animeImg)}" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/40x40/ccc/fff'"></div>`,
+                    html: `${badgeHtml}<div class="zen-marker"><img src="${DOMPurify.sanitize(imgUrl)}" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/40x40/ccc/fff'"></div>`,
                     iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -25]
                 });
 
                 const svUrl = DOMPurify.sanitize(`https://www.google.com/maps?layer=c&cbll=${poi.lat},${poi.lng}`);
-                const ytUrl = DOMPurify.sanitize(poi.ytLink || `https://www.youtube.com/results?search_query=${encodeURIComponent(poi.anime + ' ' + poi.location + ' 聖地巡禮 vlog')}`);
-                const safeId = DOMPurify.sanitize(poi.id || String(Math.random()));
-                const episodeTag = poi.episode ? `<span class="tag">${DOMPurify.sanitize(poi.episode)}</span>` : '';
+                const ytUrl = DOMPurify.sanitize(poi.ytLink || `https://www.youtube.com/results?search_query=${encodeURIComponent((poi.anime||'') + ' ' + (poi.location||'') + ' 聖地巡禮 vlog')}`);
+                const safeId = DOMPurify.sanitize(poi.id || String(Math.random()).replace('.',''));
+                const episodeTag = poi.episode ? `<span class="tag">${DOMPurify.sanitize(poi.episode)}</span>` : (poi.category === 'gourmet' ? `<span class="tag">🍣 美食</span>` : `<span class="tag">📍 景點</span>`);
 
-                // Rating Data (Mocked from JSON)
                 const rating = poi.rating || 4.5;
                 const rCount = poi.reviewCount || 128;
                 const review = poi.sampleReview || "「現場看真的很感動，交通也算方便，非常推薦老粉來朝聖！」";
 
                 const popupHtml = `
-                    <div class="popup-header"><span>${DOMPurify.sanitize(poi.anime || '景點')}</span>${episodeTag}</div>
+                    <div class="popup-header"><span>${DOMPurify.sanitize(poi.anime || '精選推薦')}</span>${episodeTag}</div>
                     <div class="popup-body">
                         <div class="popup-loc">${DOMPurify.sanitize(name.replace(/^\[.*?\]\s*/, ''))}</div>
                         
-                        <!-- 評星系統 -->
                         <div class="rating-row">
                             <span class="stars">${getStars(rating)}</span> 
                             <span>${rating} (${rCount} ${i18n[currentLang].reviewTitle})</span>
                         </div>
 
                         <div class="anime-img-box">
-                            <img class="popup-img" src="${DOMPurify.sanitize(poi.img || poi.animeImg)}" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=No+Image'">
+                            <img class="popup-img" src="${DOMPurify.sanitize(imgUrl)}" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/400x200/ccc/fff?text=No+Image'">
                         </div>
-                        <div class="source-text">圖片來源: <a href="${DOMPurify.sanitize(poi.sourceUrl)}" target="_blank">${DOMPurify.sanitize(poi.imageSource)}</a></div>
+                        <div class="source-text">圖片來源: <a href="${DOMPurify.sanitize(poi.sourceUrl||'#')}" target="_blank">${DOMPurify.sanitize(poi.imageSource||'網路')}</a></div>
                         
                         <div class="popup-desc"><b>📖 景點解說：</b><br>${DOMPurify.sanitize(desc)}</div>
                         
-                        <!-- 網友評論區 -->
                         <div class="popup-review">
                             <span style="font-size: 16px;">💬</span>
                             <div><b>精選評價：</b><br>"${DOMPurify.sanitize(review)}"</div>
@@ -232,9 +228,8 @@ window.lastSelectedRoute = routeFilter;
                 let marker = L.marker([poi.lat, poi.lng], { icon: customIcon });
                 marker.bindPopup(popupHtml).addTo(markerGroup);
                 
-                // Fetch real likes on click
                 marker.on('popupopen', function() {
-                    fetch(`https://api.counterapi.dev/v1/animemap_v8_para/${safeId}/`)
+                    fetch(`https://api.counterapi.dev/v1/animemap_v10_para/${safeId}/`)
                         .then(r => r.json())
                         .then(data => {
                             let count = data.count || 0;
