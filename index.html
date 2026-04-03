@@ -73,8 +73,8 @@
         </select>
         <select id="route-filter" onchange="renderMap()">
             <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore)</option>
-            <option value="tour_gifu_3day" id="t-route-gifu">🚗 岐阜 3 日自駕：動漫與和牛</option>
-        </select>
+<!-- Routes injected dynamically -->
+</select>
     </div>
     <div id="map"></div>
 
@@ -103,7 +103,24 @@
             document.getElementById('t-cat-nature').innerText = i18n[currentLang].catNature;
             document.getElementById('t-cat-gourmet').innerText = i18n[currentLang].catGourmet;
             document.getElementById('t-route-none').innerText = i18n[currentLang].routeNone;
-            const routeOpt = document.getElementById('t-route-gifu');
+            
+            // Dynamically update routes
+            const routeFilter = document.getElementById('route-filter');
+            // Keep the first option
+            const firstOpt = routeFilter.options[0];
+            routeFilter.innerHTML = '';
+            routeFilter.appendChild(firstOpt);
+            
+            mapData.itineraries.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.innerText = '🚗 ' + (currentLang === 'en' ? r.name_en : currentLang === 'ja' ? r.name_ja : r.name_zh);
+                // retain selection
+                if (window.lastSelectedRoute === r.id) opt.selected = true;
+                routeFilter.appendChild(opt);
+            });
+
+// const routeOpt
             if(routeOpt && mapData.itineraries[0]) {
                 const r = mapData.itineraries[0];
                 routeOpt.innerText = currentLang === 'en' ? '🚗 ' + r.name_en : currentLang === 'ja' ? '🚗 ' + r.name_ja : '🚗 ' + r.name_zh;
@@ -134,6 +151,7 @@
 
             const catFilter = document.getElementById('cat-filter').value;
             const routeFilter = document.getElementById('route-filter').value;
+window.lastSelectedRoute = routeFilter;
             
             let displayPois = [];
             let routeCoords = [];
