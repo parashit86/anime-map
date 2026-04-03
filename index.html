@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Japan Travel Zen Map (V22.0)</title>
+    <title>Japan Travel Zen Map</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -65,7 +65,7 @@
         .anime-img-box img { width: 100%; height: 150px; object-fit: cover; display: block; }
         .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 12px; margin-top: 4px; }
         .source-text a { color: #888; text-decoration: underline; }
-        .popup-desc { font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff; padding: 10px; border-left: 3px solid var(--ruri-blue); border-radius: 0 4px 4px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+        .popup-desc { font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff; padding: 10px; border-left: 3px solid var(--ruri-blue); border-radius: 0 4px 4px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); max-height: 100px; overflow-y: auto;}
         .popup-review { font-size: 12px; color: #666; font-style: italic; background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 15px; display: flex; gap: 8px; align-items: flex-start;}
         
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
@@ -122,7 +122,6 @@
         let mapData = { pois: [], itineraries: [] };
         let map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
         
-        // 使用 Google 官方無痛地圖
         L.tileLayer('https://mt0.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps' }).addTo(map);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -155,9 +154,11 @@
             renderMap();
         }
 
-        // Fetch data normally without DOMPurify logic blocking it
         fetch('anime_map_data.json?v=' + Date.now())
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('HTTP Error ' + r.status);
+                return r.json();
+            })
             .then(data => { 
                 mapData = data; 
                 changeLang(); 
@@ -168,7 +169,7 @@
                 document.getElementById('t-cat-all').innerText = "⚠️ 載入失敗 (請重整)";
             });
 
-        function handleLike(btn, id) {
+        window.handleLike = function(btn, id) {
             btn.classList.add('liked');
             let countSpan = btn.querySelector('.l-count');
             if (countSpan) countSpan.innerText = parseInt(countSpan.innerText) + 1;
@@ -181,7 +182,7 @@
             return '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
         }
 
-        function renderMap() {
+        window.renderMap = function() {
             markerGroup.clearLayers();
             if (routePolyline) map.removeLayer(routePolyline);
 
@@ -219,19 +220,29 @@
                 const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated)' : poi.desc_zh;
                 
                 const badgeHtml = poi.routeIndex ? `<div class="marker-badge">${poi.routeIndex}</div>` : '';
-                const imgUrl = poi.img || poi.animeImg || fallbackImg;
+                let imgUrl = poi.img || poi.animeImg || fallbackImg;
                 
+                // Safely clean string
+                function sanitizeStr(str) {
+                    if (!str) return '';
+                    return str.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+                }
+                
+                const safeImg = sanitizeStr(imgUrl);
+                const safeFallback = sanitizeStr(fallbackImg);
+
                 const customIcon = L.divIcon({
                     className: 'zen-custom-icon',
-                    html: `${badgeHtml}<div class="zen-marker"><img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';"></div>`,
+                    html: `${badgeHtml}<div class="zen-marker"><img src="${safeImg}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${safeFallback}';"></div>`,
                     iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -25]
                 });
 
                 const svUrl = `https://www.google.com/maps?layer=c&cbll=${poi.lat},${poi.lng}`;
                 const ytUrl = poi.ytLink || `https://www.youtube.com/results?search_query=${encodeURIComponent((poi.anime||'') + ' ' + (poi.location||'') + ' vlog')}`;
-                const safeId = poi.id || String(Math.random()).replace('.','');
-                const episodeTag = poi.episode ? `<span class="tag">${poi.episode}</span>` : (poi.category === 'gourmet' ? `<span class="tag">🍣 美食</span>` : `<span class="tag">📍 景點</span>`);
-                const cleanName = name.replace(/^\[.*?\]\s*/, '');
+                const safeId = sanitizeStr(poi.id || String(Math.random()).replace('.',''));
+                const episodeTag = poi.episode ? `<span class="tag">${sanitizeStr(poi.episode)}</span>` : (poi.category === 'gourmet' ? `<span class="tag">🍣 美食</span>` : `<span class="tag">📍 景點</span>`);
+                
+                const cleanName = sanitizeStr(name.replace(/^\[.*?\]\s*/, ''));
                 const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent('總結 ' + cleanName + ' 的 Google 評論與評價')}`;
 
                 const rating = poi.rating || 4.5;
@@ -239,14 +250,14 @@
                 const review = poi.sampleReview || "「現場看真的很感動，交通也算方便，非常推薦老粉來朝聖！」";
 
                 const popupHtml = `
-                    <div class="popup-header"><span>${poi.anime || '精選推薦'}</span>${episodeTag}</div>
+                    <div class="popup-header"><span>${sanitizeStr(poi.anime || '精選推薦')}</span>${episodeTag}</div>
                     <div class="popup-body">
                         <div class="popup-loc">${cleanName}</div>
                         <div class="rating-row"><span class="stars">${getStars(rating)}</span> <span>${rating} (${rCount} ${i18n[currentLang].reviewTitle})</span></div>
-                        <div class="anime-img-box"><img class="popup-img" src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';"></div>
-                        <div class="source-text">圖片來源: <a href="${poi.sourceUrl||'#'}" target="_blank">${poi.imageSource||'網路'}</a></div>
-                        <div class="popup-desc"><b>📖 景點解說：</b><br>${desc}</div>
-                        <div class="popup-review"><span style="font-size: 16px;">💬</span><div><b>精選評價：</b><br>"${review}"</div></div>
+                        <div class="anime-img-box"><img class="popup-img" src="${safeImg}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${safeFallback}';"></div>
+                        <div class="source-text">圖片來源: <a href="${sanitizeStr(poi.sourceUrl||'#')}" target="_blank">${sanitizeStr(poi.imageSource||'網路')}</a></div>
+                        <div class="popup-desc"><b>📖 景點解說：</b><br>${sanitizeStr(desc)}</div>
+                        <div class="popup-review"><span style="font-size: 16px;">💬</span><div><b>精選評價：</b><br>"${sanitizeStr(review)}"</div></div>
                         <div class="btn-grid">
                             <button class="btn-action btn-like" onclick="handleLike(this, '${safeId}')">🤍 <span class="l-count">0</span> ${i18n[currentLang].likeBtn}</button>
                             <a href="${svUrl}" target="_blank" class="btn-action btn-sv">🗺️ ${i18n[currentLang].svBtn}</a>
@@ -276,7 +287,7 @@
         }
 
         // 拖曳與收合功能
-        function toggleControls(e) {
+        window.toggleControls = function(e) {
             if (e) e.stopPropagation();
             const controls = document.getElementById('controls');
             isCollapsed = !isCollapsed;
@@ -287,9 +298,10 @@
                 controls.classList.remove('collapsed');
                 controls.classList.add('expanded');
             }
-        }
+        };
+
         document.getElementById('controls').addEventListener('click', function(e) {
-            if (isCollapsed) toggleControls();
+            if (isCollapsed) toggleControls(e);
         });
 
         const controlsEl = document.getElementById('controls');
