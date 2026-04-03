@@ -31,21 +31,21 @@
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
 
-        .header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 5px; margin-bottom: 5px; border-bottom: 1px solid #eaeaea;}
+        .header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 5px; margin-bottom: 5px; border-bottom: 1px solid #eaeaea; flex-wrap: nowrap; gap: 5px; }
         .header-row:active { cursor: grabbing; }
-        .drag-handle { flex-grow: 1; padding: 5px 0; display:flex; align-items:center; gap:8px;}
-        h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 16px; color: var(--ruri-blue); pointer-events: none;}
+        .drag-handle { flex-grow: 1; padding: 5px 0; display:flex; align-items:center; gap:5px; white-space: nowrap; overflow: hidden; }
+        h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 14px; font-weight: bold; color: var(--ruri-blue); pointer-events: none; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
         
         #controls.collapsed .header-row, #controls.collapsed #filter-container { display: none !important; }
         
         .minimized-icon { display: none; color: white; font-size: 24px; pointer-events: none; }
         #controls.collapsed .minimized-icon { display: block !important; }
 
-        .lang-switch { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; }
-        .toggle-btn { background: #f0f0f0; border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; margin-left: 5px; }
+        .lang-switch { background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 4px 6px; font-size: 11px; cursor: pointer; flex-shrink: 0; }
+        .toggle-btn { background: var(--ruri-blue); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
         
         #filter-container { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; width: 100%;}
+        select { font-family: 'Noto Sans TC'; font-size: 14px; font-weight: 500; padding: 10px 12px; border-radius: 8px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; width: 100%; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
         
         /* 地圖標記 */
         .zen-marker { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--ruri-blue); background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative;}
@@ -79,15 +79,18 @@
         .btn-gmap { background: #34A853; grid-column: span 2;}
         .btn-yt { background: #FF0000; grid-column: span 2; font-size: 13px;}
         .sv-warning { font-size: 11px; color: #999; text-align: center; margin-top: 5px; }
-    </style>
+    
+        /* Prevent text selection while dragging */
+        #controls { user-select: none; -webkit-user-select: none; }
+</style>
 </head>
 <body>
     <div id="controls" class="expanded">
         <div class="minimized-icon">🗺️</div>
         <div class="header-row">
             <div class="drag-handle">
-                <span style="color:#aaa; font-size:16px;">✋</span>
-                <h3 id="t-title">🇯🇵 日本深度導覽地圖</h3>
+                <span style="color:#888; font-size:14px; margin-right:2px;">☰</span>
+                <h3 id="t-title" style="pointer-events:none;">🇯🇵 深度導覽地圖</h3>
             </div>
             <div style="display: flex; align-items: center;">
                 <select class="lang-switch" id="lang-select" onchange="changeLang()">
