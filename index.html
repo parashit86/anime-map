@@ -54,12 +54,16 @@
     <div id="controls">
         <div class="header-row">
             <h3 id="t-title">🇯🇵 日本深度導覽地圖</h3>
-            <select class="lang-switch" id="lang-select" onchange="changeLang()">
-                <option value="zh">繁體中文</option>
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
-            </select>
+            <div style="display: flex; align-items: center;">
+                <select class="lang-switch" id="lang-select" onchange="changeLang()">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                </select>
+                <button class="toggle-btn" onclick="toggleControls()" id="toggle-icon">🔽</button>
+            </div>
         </div>
+        <div id="filter-container">
         <select id="cat-filter" onchange="renderMap()">
             <option value="all" id="t-cat-all">🌸 所有分類 (All Categories)</option>
             <option value="anime" id="t-cat-anime">🎬 動漫聖地 (Anime Pilgrimages)</option>
@@ -71,6 +75,7 @@
             <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore)</option>
             <!-- Routes injected by JS -->
         </select>
+        </div>
     </div>
     <div id="map"></div>
 
@@ -82,6 +87,19 @@
         };
 
         let currentLang = 'zh';
+        let isCollapsed = false;
+        function toggleControls() {
+            const controls = document.getElementById('controls');
+            const icon = document.getElementById('toggle-icon');
+            isCollapsed = !isCollapsed;
+            if(isCollapsed) {
+                controls.classList.add('collapsed');
+                icon.innerText = '◀️';
+            } else {
+                controls.classList.remove('collapsed');
+                icon.innerText = '🔽';
+            }
+        }
         let mapData = { pois: [], itineraries: [] };
         let map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
         L.tileLayer('https://mt0.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps' }).addTo(map);
