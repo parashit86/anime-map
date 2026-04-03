@@ -25,7 +25,9 @@
         #controls.expanded { padding: 15px 20px; }
         #controls.collapsed { 
             width: 56px !important; height: 56px !important; max-width: 56px !important; padding: 0 !important;
-            border-radius: 28px !important; background: var(--ruri-blue); border: none;
+            border-radius: 28px !important; background: var(--ruri-blue); 
+            border: 3px solid white !important; /* Thick white border */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important; /* Stronger drop shadow */
             display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
 
@@ -300,14 +302,55 @@
             }
         };
 
-        document.getElementById('controls').addEventListener('click', function(e) {
-            if (isCollapsed) toggleControls(e);
-        });
+        
 
         const controlsEl = document.getElementById('controls');
         const headerEl = document.querySelector('.header-row');
         let isDragging = false;
         let startX, startY, initialLeft, initialTop;
+
+        // Update drag logic to apply to the whole control box when collapsed
+        controlsEl.addEventListener('pointerdown', (e) => {
+            if (isCollapsed) {
+                isDragging = true;
+                startX = e.clientX; startY = e.clientY;
+                const rect = controlsEl.getBoundingClientRect();
+                controlsEl.style.transform = 'none';
+                controlsEl.style.left = rect.left + 'px';
+                controlsEl.style.top = rect.top + 'px';
+                initialLeft = rect.left; initialTop = rect.top;
+                controlsEl.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            }
+        });
+        controlsEl.addEventListener('pointermove', (e) => {
+            if (!isDragging || !isCollapsed) return;
+            const dx = e.clientX - startX; const dy = e.clientY - startY;
+            controlsEl.style.left = (initialLeft + dx) + 'px';
+            controlsEl.style.top = (initialTop + dy) + 'px';
+            
+            // If dragging occurred, prevent the click from toggling
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                controlsEl.setAttribute('data-dragged', 'true');
+            }
+        });
+        controlsEl.addEventListener('pointerup', (e) => {
+            if (isCollapsed) { isDragging = false; controlsEl.releasePointerCapture(e.pointerId); }
+        });
+        controlsEl.addEventListener('pointercancel', (e) => {
+            if (isCollapsed) { isDragging = false; controlsEl.releasePointerCapture(e.pointerId); }
+        });
+
+        // Add logic to prevent click if dragged
+        document.getElementById('controls').addEventListener('click', function(e) {
+            if (isCollapsed) {
+                if (this.getAttribute('data-dragged') === 'true') {
+                    this.removeAttribute('data-dragged');
+                    return; // Prevent expanding if we just dragged it
+                }
+                toggleControls(e);
+            }
+        });
 
         headerEl.addEventListener('pointerdown', (e) => {
             if(e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'select' || e.target.classList.contains('minimized-icon')) return;
