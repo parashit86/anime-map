@@ -293,6 +293,15 @@
                         }).catch(()=>{});
                 });
             });
+            
+            // 加入自動最小化與展開的連動邏輯
+            map.on('popupopen', function() {
+                if (!isCollapsed) toggleControls();
+            });
+            
+            map.on('popupclose', function() {
+                if (isCollapsed) toggleControls();
+            });
         }
 
         // 拖曳與收合功能
