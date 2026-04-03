@@ -13,8 +13,8 @@
         :root { --ruri-blue: #1E50A2; --sakura-pink: #FEDFE1; --uguisu-green: #838A2D; --akane-red: #B7282E; --washi-bg: #F9F8F4; --text-main: #2C2C2C; --gold-star: #F5A623; }
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Noto Sans TC', sans-serif; background: var(--washi-bg); overflow: hidden; color: var(--text-main); }
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; }
-        #controls { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000; background: rgba(249, 248, 244, 0.95); padding: 15px 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 450px; box-sizing: border-box; border-top: 4px solid var(--ruri-blue); backdrop-filter: blur(8px); transition: all 0.3s ease; }
-        .header-row { display: flex; justify-content: space-between; align-items: center; }
+        #controls { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); touch-action: none; z-index: 1000; background: rgba(249, 248, 244, 0.95); padding: 15px 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 450px; box-sizing: border-box; border-top: 4px solid var(--ruri-blue); backdrop-filter: blur(8px); transition: all 0.3s ease; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 2px; border-bottom: 1px solid transparent; } .header-row:active { cursor: grabbing; }
         h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 18px; color: var(--ruri-blue); }
         .lang-switch { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; }
         select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; width: 100%;}
@@ -53,7 +53,7 @@
 <body>
     <div id="controls">
         <div class="header-row">
-            <h3 id="t-title">🇯🇵 日本深度導覽地圖</h3>
+            <div style="display:flex; align-items:center; gap:8px;"><span style="color:#aaa; font-size:12px;">🖐️</span><h3 id="t-title" style="pointer-events:none;">🇯🇵 日本深度導覽地圖</h3></div>
             <div style="display: flex; align-items: center;">
                 <select class="lang-switch" id="lang-select" onchange="changeLang()">
                     <option value="zh">繁體中文</option>
@@ -261,6 +261,54 @@
                 });
             });
         }
-    </script>
+    
+        // --- 拖曳功能 (Draggable functionality) ---
+        const controlsEl = document.getElementById('controls');
+        const headerEl = document.querySelector('.header-row');
+        
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        headerEl.addEventListener('pointerdown', (e) => {
+            // 不要在點擊下拉或按鈕時觸發拖曳
+            if(e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'select') return;
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            // 獲取當前的位置
+            const rect = controlsEl.getBoundingClientRect();
+            // 取消 translateX(-50%) 以方便直接以 px 計算
+            controlsEl.style.transform = 'none';
+            controlsEl.style.left = rect.left + 'px';
+            controlsEl.style.top = rect.top + 'px';
+            controlsEl.style.width = controlsEl.offsetWidth + 'px'; // 鎖定寬度
+            
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            
+            headerEl.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        });
+
+        headerEl.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            controlsEl.style.left = (initialLeft + dx) + 'px';
+            controlsEl.style.top = (initialTop + dy) + 'px';
+        });
+
+        headerEl.addEventListener('pointerup', (e) => {
+            isDragging = false;
+            headerEl.releasePointerCapture(e.pointerId);
+        });
+        headerEl.addEventListener('pointercancel', (e) => {
+            isDragging = false;
+            headerEl.releasePointerCapture(e.pointerId);
+        });
+
+</script>
 </body>
 </html>
