@@ -3,163 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src * data: blob:; connect-src *;">
-    <title>Japan Travel Zen Map (V10.0</title>
+    <title>Japan Travel Zen Map (V22.0)</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <style>
         :root { --ruri-blue: #1E50A2; --sakura-pink: #FEDFE1; --uguisu-green: #838A2D; --akane-red: #B7282E; --washi-bg: #F9F8F4; --text-main: #2C2C2C; --gold-star: #F5A623; }
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Noto Sans TC', sans-serif; background: var(--washi-bg; overflow: hidden; color: var(--text-main; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Noto Sans TC', sans-serif; background: #e5e3df; overflow: hidden; color: var(--text-main); }
         
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; background: #e5e3df; }
-    
         
-        /* 懸浮控制列 (支援最小化成圖標 */
+        /* 懸浮控制列 */
         #controls {
-            position: absolute;
-            top: 15px; left: 50%; transform: translateX(-50%; z-index: 1000;
-            background: rgba(249, 248, 244, 0.95;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15;
-            display: flex; flex-direction: column; gap: 10px;
-            width: 90%; max-width: 450px;
-            box-sizing: border-box;
-            border-top: 4px solid var(--ruri-blue;
-            backdrop-filter: blur(8px;
-            transition: max-width 0.3s, padding 0.3s, border-radius 0.3s, opacity 0.3s;
-            overflow: hidden; /* 防止內容溢出 */
-            touch-action: none;
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000;
+            background: rgba(249, 248, 244, 0.95); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 450px; box-sizing: border-box;
+            border-top: 4px solid var(--ruri-blue); backdrop-filter: blur(8px);
+            transition: all 0.3s ease; transform-origin: top center; overflow: hidden; touch-action: none;
         }
 
-        /* 展開狀態的內距 */
-        #controls.expanded {
-            padding: 15px 20px;
+        #controls.expanded { padding: 15px 20px; }
+        #controls.collapsed { 
+            width: 56px !important; height: 56px !important; max-width: 56px !important; padding: 0 !important;
+            border-radius: 28px !important; background: var(--ruri-blue); border: none;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
 
-        /* 最小化狀態：變成一顆圓形 Icon */
-        #controls.collapsed {
-            width: 50px !important;
-            height: 50px !important;
-            max-width: 50px !important;
-            padding: 0 !important;
-            border-radius: 50% !important;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            background: var(--ruri-blue;
-        }
-
-        .header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 2px;}
+        .header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 5px; margin-bottom: 5px; border-bottom: 1px solid #eaeaea;}
         .header-row:active { cursor: grabbing; }
+        .drag-handle { flex-grow: 1; padding: 5px 0; display:flex; align-items:center; gap:8px;}
+        h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 16px; color: var(--ruri-blue); pointer-events: none;}
         
-        /* 隱藏內容的切換類別 */
-        #controls.collapsed .header-row,
-        #controls.collapsed #filter-container {
-            display: none !important;
-        }
-
-        /* 最小化時顯示的地圖圖標 */
-        .minimized-icon {
-            display: none;
-            color: white;
-            font-size: 24px;
-        }
-        #controls.collapsed .minimized-icon {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%; height: 100%;
-        }
-
-        #filter-container { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        #controls.collapsed .header-row, #controls.collapsed #filter-container { display: none !important; }
         
-        /* 收折按鈕 */
-        .toggle-btn { background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 5px; margin-left: 5px; }
-.header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 2px; border-bottom: 1px solid transparent; } .header-row:active { cursor: grabbing; }
-        h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 18px; color: var(--ruri-blue; }
+        .minimized-icon { display: none; color: white; font-size: 24px; pointer-events: none; }
+        #controls.collapsed .minimized-icon { display: block !important; }
+
         .lang-switch { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; }
+        .toggle-btn { background: #f0f0f0; border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; margin-left: 5px; }
+        
+        #filter-container { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; width: 100%;}
         
-        .zen-marker { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--ruri-blue; background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2; position: relative;}
+        /* 地圖標記 */
+        .zen-marker { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--ruri-blue); background: #fff; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative;}
         .zen-marker img { width: 100%; height: 100%; object-fit: cover; }
-        .marker-badge { position: absolute; top: -5px; right: -5px; background: var(--akane-red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .marker-badge { position: absolute; top: -5px; right: -5px; background: var(--akane-red); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 10; }
         
-        .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2; background: var(--washi-bg; }
+        /* 彈出視窗 */
+        .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); background: var(--washi-bg); }
         .leaflet-popup-content { margin: 0; width: 320px !important; }
-        .popup-header { background: var(--ruri-blue; color: #fff; padding: 10px 15px; font-family: 'Noto Serif JP', serif; font-size: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
-        .popup-header span.tag { background: rgba(255,255,255,0.2; padding: 3px 8px; border-radius: 12px; font-size: 11px; }
+        .popup-header { background: var(--ruri-blue); color: #fff; padding: 10px 15px; font-family: 'Noto Serif JP', serif; font-size: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+        .popup-header span.tag { background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 12px; font-size: 11px; }
         .popup-body { padding: 15px; }
         .popup-loc { font-weight: 700; font-size: 17px; margin-bottom: 4px; color: #222; }
         
         .rating-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 13px; font-weight: 500; color: #555; }
-        .stars { color: var(--gold-star; letter-spacing: 1px; font-size: 14px;}
+        .stars { color: var(--gold-star); letter-spacing: 1px; font-size: 14px;}
         
-        .anime-img-box { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1; margin-bottom: 0px; }
+        .anime-img-box { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 0px; }
         .anime-img-box img { width: 100%; height: 150px; object-fit: cover; display: block; }
         .source-text { font-size: 10px; color: #888; text-align: right; margin-bottom: 12px; margin-top: 4px; }
         .source-text a { color: #888; text-decoration: underline; }
-        .popup-desc { font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff; padding: 10px; border-left: 3px solid var(--ruri-blue; border-radius: 0 4px 4px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05;}
+        .popup-desc { font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff; padding: 10px; border-left: 3px solid var(--ruri-blue); border-radius: 0 4px 4px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
         .popup-review { font-size: 12px; color: #666; font-style: italic; background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 15px; display: flex; gap: 8px; align-items: flex-start;}
         
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; } .btn-gmap { background: #34A853; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         .btn-action { display: flex; justify-content: center; align-items: center; gap: 5px; width: 100%; text-align: center; color: white; padding: 10px 5px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; transition: opacity 0.2s; border: none; cursor: pointer;}
         .btn-action:hover { opacity: 0.9; }
-        .btn-like { background: #fff; border: 1px solid #ddd; color: var(--akane-red; }
-        .btn-like.liked { background: var(--sakura-pink; border-color: var(--akane-red; }
+        .btn-like { background: #fff; border: 1px solid #ddd; color: var(--akane-red); }
+        .btn-like.liked { background: var(--sakura-pink); border-color: var(--akane-red); }
         .btn-sv { background: #4285F4; }
+        .btn-gmap { background: #34A853; grid-column: span 2;}
         .btn-yt { background: #FF0000; grid-column: span 2; font-size: 13px;}
         .sv-warning { font-size: 11px; color: #999; text-align: center; margin-top: 5px; }
-    
-        .drag-handle { flex-grow: 1; cursor: grab; padding: 5px 0; }
-        .drag-handle:active { cursor: grabbing; }
-        
-        #controls .header-row { padding-bottom: 5px; margin-bottom: 5px; border-bottom: 1px solid #eaeaea; }
-
-        #controls { transition: all 0.3s ease; transform-origin: top center; overflow: hidden; }
-        #controls.collapsed { 
-            width: 56px !important; height: 56px !important; padding: 0 !important;
-            border-radius: 28px !important; background: var(--ruri-blue; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-        #controls.collapsed > * { display: none !important; }
-        .minimized-icon { display: none; color: white; font-size: 24px; pointer-events: none; }
-        #controls.collapsed .minimized-icon { display: block !important; }
     </style>
 </head>
 <body>
     <div id="controls" class="expanded">
-        <!-- 最小化時的圖標 (點擊會展開 -->
-        <div class="minimized-icon" onclick="toggleControls(" title="展開選單">🗺️</div>
-        
+        <div class="minimized-icon">🗺️</div>
         <div class="header-row">
-            <div style="display:flex; align-items:center; gap:8px;" class="drag-handle">
+            <div class="drag-handle">
                 <span style="color:#aaa; font-size:16px;">✋</span>
-                <h3 id="t-title" style="pointer-events:none; font-size:16px;">🇯🇵 日本深度導覽地圖</h3>
+                <h3 id="t-title">🇯🇵 日本深度導覽地圖</h3>
             </div>
             <div style="display: flex; align-items: center;">
-                <select class="lang-switch" id="lang-select" onchange="changeLang(">
+                <select class="lang-switch" id="lang-select" onchange="changeLang()">
                     <option value="zh">繁體中文</option>
                     <option value="en">English</option>
                     <option value="ja">日本語</option>
                 </select>
-                <button class="toggle-btn" onclick="toggleControls(event" id="toggle-icon" style="background:#f0f0f0; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center;">🔽</button>
+                <button class="toggle-btn" onclick="toggleControls(event)" id="toggle-icon">🔽</button>
             </div>
         </div>
         <div id="filter-container">
-            <select id="cat-filter" onchange="renderMap(">
-                <option value="all" id="t-cat-all">🌸 所有分類 (All Categories</option>
-                <option value="anime" id="t-cat-anime">🎬 動漫聖地 (Anime Pilgrimages</option>
-                <option value="history" id="t-cat-history">🏯 歷史古蹟 (Historical Sites</option>
-                <option value="nature" id="t-cat-nature">🌲 大自然絕景 (Nature & Seasons</option>
-                <option value="gourmet" id="t-cat-gourmet">🍣 在地美食 (Gourmet</option>
+            <select id="cat-filter" onchange="renderMap()">
+                <option value="all" id="t-cat-all">🌸 所有分類 (All Categories)</option>
+                <option value="anime" id="t-cat-anime">🎬 動漫聖地 (Anime Pilgrimages)</option>
+                <option value="history" id="t-cat-history">🏯 歷史古蹟 (Historical Sites)</option>
+                <option value="nature" id="t-cat-nature">🌲 大自然絕景 (Nature & Seasons)</option>
+                <option value="gourmet" id="t-cat-gourmet">🍣 在地美食 (Gourmet)</option>
             </select>
-            <select id="route-filter" onchange="renderMap(">
-                <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore</option>
-                <!-- Routes injected by JS -->
+            <select id="route-filter" onchange="renderMap()">
+                <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore)</option>
             </select>
         </div>
     </div>
@@ -167,148 +113,126 @@
 
     <script>
         const i18n = {
-            zh: { title: "🇯🇵 日本深度導覽地圖", catAll: "🌸 所有分類", catAnime: "🎬 動漫聖地", catHistory: "🏯 歷史古蹟", catNature: "🌲 大自然", catGourmet: "🍣 在地美食", routeNone: "🗺️ 自由探索", svBtn: "實景", ytBtn: "觀看旅客 Vlog 影片", likeBtn: "推薦", liked: "已推薦", reviewTitle: "網友評價" },
-            en: { title: "🇯🇵 Japan Zen Travel Map", catAll: "🌸 All Categories", catAnime: "🎬 Anime", catHistory: "🏯 History", catNature: "🌲 Nature", catGourmet: "🍣 Gourmet", routeNone: "🗺️ Free Explore", svBtn: "Street View", ytBtn: "Watch Traveler Vlog", likeBtn: "Recommend", liked: "Liked", reviewTitle: "Reviews" },
-            ja: { title: "🇯🇵 日本深掘りマップ", catAll: "🌸 すべて", catAnime: "🎬 アニメ聖地", catHistory: "🏯 歴史・史跡", catNature: "🌲 自然・絶景", catGourmet: "🍣 ご当地グルメ", routeNone: "🗺️ 自由探索", svBtn: "ストリートビュー", ytBtn: "巡礼 Vlog を見る", likeBtn: "いいね", liked: "おすすめ済", reviewTitle: "クチコミ" }
+            zh: { title: "🇯🇵 日本深度導覽地圖", catAll: "🌸 所有分類", catAnime: "🎬 動漫聖地", catHistory: "🏯 歷史古蹟", catNature: "🌲 大自然", catGourmet: "🍣 在地美食", routeNone: "🗺️ 自由探索", svBtn: "實景", ytBtn: "觀看旅客 Vlog 影片", likeBtn: "推薦", liked: "已推薦", reviewTitle: "網友評價", gmapBtn: "⭐ 總結評論" },
+            en: { title: "🇯🇵 Japan Zen Travel Map", catAll: "🌸 All Categories", catAnime: "🎬 Anime", catHistory: "🏯 History", catNature: "🌲 Nature", catGourmet: "🍣 Gourmet", routeNone: "🗺️ Free Explore", svBtn: "Street View", ytBtn: "Watch Traveler Vlog", likeBtn: "Recommend", liked: "Liked", reviewTitle: "Reviews", gmapBtn: "⭐ Reviews Summary" },
+            ja: { title: "🇯🇵 日本深掘りマップ", catAll: "🌸 すべて", catAnime: "🎬 アニメ聖地", catHistory: "🏯 歴史・史跡", catNature: "🌲 自然・絶景", catGourmet: "🍣 ご当地グルメ", routeNone: "🗺️ 自由探索", svBtn: "ストリートビュー", ytBtn: "巡礼 Vlog を見る", likeBtn: "いいね", liked: "おすすめ済", reviewTitle: "クチコミ", gmapBtn: "⭐ クチコミまとめ" }
         };
 
         let currentLang = 'zh';
-        let isCollapsed = false;
-        function toggleControls(e {
-            if (e e.stopPropagation(;
-            const controls = document.getElementById('controls';
-            isCollapsed = !isCollapsed;
-            if(isCollapsed {
-                controls.classList.add('collapsed';
-            } else {
-                controls.classList.remove('collapsed';
-            }
-        } else {
-                controls.classList.remove('collapsed';
-                controls.classList.add('expanded';
-            }
-        } else {
-                controls.classList.remove('collapsed';
-                icon.innerText = '🔽';
-            }
-        }
         let mapData = { pois: [], itineraries: [] };
-        let map = L.map('map', { zoomControl: false }.setView([36.5, 138.0], 5;
-        L.tileLayer('https://mt0.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps' }.addTo(map;
-        L.control.zoom({ position: 'bottomright' }.addTo(map;
+        let map = L.map('map', { zoomControl: false }).setView([36.5, 138.0], 5);
+        
+        // 使用 Google 官方無痛地圖
+        L.tileLayer('https://mt0.google.com/vt/lyrs=m&hl=zh-TW&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google Maps' }).addTo(map);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        let markerGroup = L.layerGroup(.addTo(map;
+        let markerGroup = L.layerGroup().addTo(map);
         let routePolyline = null;
+        let isCollapsed = false;
 
-        document.getElementById('controls'.addEventListener('click', function(e {
-            if (isCollapsed toggleControls(;
-        };
-    
-
-        function changeLang( {
-            currentLang = document.getElementById('lang-select'.value;
-            document.getElementById('t-title'.innerText = i18n[currentLang].title;
-            document.getElementById('t-cat-all'.innerText = i18n[currentLang].catAll;
-            document.getElementById('t-cat-anime'.innerText = i18n[currentLang].catAnime;
-            document.getElementById('t-cat-history'.innerText = i18n[currentLang].catHistory;
-            document.getElementById('t-cat-nature'.innerText = i18n[currentLang].catNature;
-            document.getElementById('t-cat-gourmet'.innerText = i18n[currentLang].catGourmet;
+        function changeLang() {
+            currentLang = document.getElementById('lang-select').value;
+            document.getElementById('t-title').innerText = i18n[currentLang].title;
+            document.getElementById('t-cat-all').innerText = i18n[currentLang].catAll;
+            document.getElementById('t-cat-anime').innerText = i18n[currentLang].catAnime;
+            document.getElementById('t-cat-history').innerText = i18n[currentLang].catHistory;
+            document.getElementById('t-cat-nature').innerText = i18n[currentLang].catNature;
+            document.getElementById('t-cat-gourmet').innerText = i18n[currentLang].catGourmet;
             
-            // Build Route Dropdown
-            const routeFilter = document.getElementById('route-filter';
+            const routeFilter = document.getElementById('route-filter');
             const currentVal = routeFilter.value;
             routeFilter.innerHTML = `<option value="none" id="t-route-none">${i18n[currentLang].routeNone}</option>`;
             
-            if (mapData.itineraries && mapData.itineraries.length > 0 {
+            if (mapData.itineraries && mapData.itineraries.length > 0) {
                 mapData.itineraries.forEach(r => {
-                    const opt = document.createElement('option';
+                    const opt = document.createElement('option');
                     opt.value = r.id;
-                    opt.innerText = '🚗 ' + (currentLang === 'en' ? (r.name_en||r.name_zh : currentLang === 'ja' ? (r.name_ja||r.name_zh : r.name_zh;
-                    if (r.id === currentVal opt.selected = true;
-                    routeFilter.appendChild(opt;
-                };
+                    opt.innerText = '🚗 ' + (currentLang === 'en' ? (r.name_en||r.name_zh) : currentLang === 'ja' ? (r.name_ja||r.name_zh) : r.name_zh);
+                    if (r.id === currentVal) opt.selected = true;
+                    routeFilter.appendChild(opt);
+                });
             }
-            renderMap(;
+            renderMap();
         }
 
-        fetch('anime_map_data.json?v=' + Date.now(
-            .then(r => r.json(
+        // Fetch data normally without DOMPurify logic blocking it
+        fetch('anime_map_data.json?v=' + Date.now())
+            .then(r => r.json())
             .then(data => { 
                 mapData = data; 
-                
-                // Dynamically populate anime filter if needed, or just let 'all' handle it.
-                // We'll keep the static categories for now.
-                
-                changeLang(; 
-            }
-            .catch(e => console.error("Error loading map data:", e;
+                changeLang(); 
+                setTimeout(() => map.invalidateSize(), 500);
+            })
+            .catch(e => {
+                console.error("Fetch Error:", e);
+                document.getElementById('t-cat-all').innerText = "⚠️ 載入失敗 (請重整)";
+            });
 
-        function handleLike(btn, id {
-            btn.classList.add('liked';
-            let countSpan = btn.querySelector('.l-count';
-            if (countSpan countSpan.innerText = parseInt(countSpan.innerText + 1;
-            fetch(`https://api.counterapi.dev/v1/animemap_v10_para/${id}/up`.catch((=>{};
+        function handleLike(btn, id) {
+            btn.classList.add('liked');
+            let countSpan = btn.querySelector('.l-count');
+            if (countSpan) countSpan.innerText = parseInt(countSpan.innerText) + 1;
+            fetch(`https://api.counterapi.dev/v1/animemap_v10_para/${id}/up`).catch(()=>{});
         }
         
-        function getStars(rating {
-            const fullStars = Math.floor(rating;
+        function getStars(rating) {
+            const fullStars = Math.floor(rating);
             const emptyStars = 5 - fullStars;
-            return '★'.repeat(fullStars + '☆'.repeat(emptyStars;
+            return '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
         }
 
-        function renderMap( {
-            markerGroup.clearLayers(;
-            if (routePolyline map.removeLayer(routePolyline;
+        function renderMap() {
+            markerGroup.clearLayers();
+            if (routePolyline) map.removeLayer(routePolyline);
 
-            const catFilter = document.getElementById('cat-filter'.value;
-            const routeFilter = document.getElementById('route-filter'.value;
+            const catFilter = document.getElementById('cat-filter').value;
+            const routeFilter = document.getElementById('route-filter').value;
             
             let displayPois = [];
             let routeCoords = [];
 
-            if (routeFilter !== "none" {
-                const itinerary = mapData.itineraries.find(i => i.id === routeFilter;
-                if (itinerary {
-                    itinerary.route.forEach((poiId, index => {
-                        const poi = mapData.pois.find(p => p.id === poiId || p.id === String(poiId;
-                        if (poi {
+            if (routeFilter !== "none") {
+                const itinerary = mapData.itineraries.find(i => i.id === routeFilter);
+                if (itinerary) {
+                    itinerary.route.forEach((poiId, index) => {
+                        const poi = mapData.pois.find(p => p.id === poiId || p.id === String(poiId));
+                        if (poi) {
                             poi.routeIndex = index + 1;
-                            displayPois.push(poi;
-                            routeCoords.push([poi.lat, poi.lng];
+                            displayPois.push(poi);
+                            routeCoords.push([poi.lat, poi.lng]);
                         }
-                    };
-                    if (routeCoords.length > 0 {
-                        routePolyline = L.polyline(routeCoords, { color: '#B7282E', weight: 4, dashArray: '5, 10' }.addTo(map;
-                        map.fitBounds(routePolyline.getBounds(, { padding: [50, 50] };
+                    });
+                    if (routeCoords.length > 0) {
+                        routePolyline = L.polyline(routeCoords, { color: '#B7282E', weight: 4, dashArray: '5, 10' }).addTo(map);
+                        map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
                     }
                 }
             } else {
-                displayPois = mapData.pois.filter(p => catFilter === "all" || p.category === catFilter || (p.anime && catFilter === 'anime';
-                displayPois.forEach(p => p.routeIndex = null;
+                displayPois = mapData.pois.filter(p => catFilter === "all" || p.category === catFilter || (p.anime && catFilter === 'anime'));
+                displayPois.forEach(p => p.routeIndex = null);
             }
+
+            const fallbackImg = 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&q=80';
 
             displayPois.forEach(poi => {
                 const name = currentLang === 'en' ? poi.name_en || poi.name_zh : currentLang === 'ja' ? poi.name_ja || poi.name_zh : poi.name_zh;
-                const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated' : poi.desc_zh;
+                const desc = currentLang === 'en' ? poi.desc_zh + ' (Translated)' : poi.desc_zh;
                 
                 const badgeHtml = poi.routeIndex ? `<div class="marker-badge">${poi.routeIndex}</div>` : '';
-                let imgUrl = poi.img || poi.animeImg;
-                if (!imgUrl || imgUrl === 'null' || imgUrl.includes('undefined' {
-                    imgUrl = 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&q=80';
-                }
-                const safeImgUrl = imgUrl;
-                const fallbackImg = 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&q=80';
+                const imgUrl = poi.img || poi.animeImg || fallbackImg;
                 
                 const customIcon = L.divIcon({
                     className: 'zen-custom-icon',
-                    html: `${badgeHtml}<div class="zen-marker"><img src="${safeImgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';"></div>`,
+                    html: `${badgeHtml}<div class="zen-marker"><img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';"></div>`,
                     iconSize: [46, 46], iconAnchor: [23, 23], popupAnchor: [0, -25]
-                };
+                });
 
                 const svUrl = `https://www.google.com/maps?layer=c&cbll=${poi.lat},${poi.lng}`;
-                const ytUrl = poi.ytLink || `https://www.youtube.com/results?search_query=${encodeURIComponent((poi.anime||'' + ' ' + (poi.location||'' + ' vlog'}`;
-                const safeId = poi.id || String(Math.random(.replace('.','';
-                const episodeTag = poi.episode ? `<span class="tag">${poi.episode}</span>` : (poi.category === 'gourmet' ? `<span class="tag">🍣 美食</span>` : `<span class="tag">📍 景點</span>`;
+                const ytUrl = poi.ytLink || `https://www.youtube.com/results?search_query=${encodeURIComponent((poi.anime||'') + ' ' + (poi.location||'') + ' vlog')}`;
+                const safeId = poi.id || String(Math.random()).replace('.','');
+                const episodeTag = poi.episode ? `<span class="tag">${poi.episode}</span>` : (poi.category === 'gourmet' ? `<span class="tag">🍣 美食</span>` : `<span class="tag">📍 景點</span>`);
+                const cleanName = name.replace(/^\[.*?\]\s*/, '');
+                const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent('總結 ' + cleanName + ' 的 Google 評論與評價')}`;
 
                 const rating = poi.rating || 4.5;
                 const rCount = poi.reviewCount || 128;
@@ -317,100 +241,93 @@
                 const popupHtml = `
                     <div class="popup-header"><span>${poi.anime || '精選推薦'}</span>${episodeTag}</div>
                     <div class="popup-body">
-                        <div class="popup-loc">${name.replace(/^\[.*?\]\s*/, ''}</div>
-                        
-                        <div class="rating-row">
-                            <span class="stars">${getStars(rating}</span> 
-                            <span>${rating} (${rCount} ${i18n[currentLang].reviewTitle}</span>
-                        </div>
-
-                        <div class="anime-img-box">
-                            <img class="popup-img" src="${safeImgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';">
-                        </div>
+                        <div class="popup-loc">${cleanName}</div>
+                        <div class="rating-row"><span class="stars">${getStars(rating)}</span> <span>${rating} (${rCount} ${i18n[currentLang].reviewTitle})</span></div>
+                        <div class="anime-img-box"><img class="popup-img" src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackImg}';"></div>
                         <div class="source-text">圖片來源: <a href="${poi.sourceUrl||'#'}" target="_blank">${poi.imageSource||'網路'}</a></div>
-                        
                         <div class="popup-desc"><b>📖 景點解說：</b><br>${desc}</div>
-                        
-                        <div class="popup-review">
-                            <span style="font-size: 16px;">💬</span>
-                            <div><b>精選評價：</b><br>"${review}"</div>
-                        </div>
-                        
+                        <div class="popup-review"><span style="font-size: 16px;">💬</span><div><b>精選評價：</b><br>"${review}"</div></div>
                         <div class="btn-grid">
-                            <button class="btn-action btn-like" onclick="handleLike(this, '${safeId}'">🤍 <span class="l-count">0</span> ${i18n[currentLang].likeBtn}</button>
+                            <button class="btn-action btn-like" onclick="handleLike(this, '${safeId}')">🤍 <span class="l-count">0</span> ${i18n[currentLang].likeBtn}</button>
                             <a href="${svUrl}" target="_blank" class="btn-action btn-sv">🗺️ ${i18n[currentLang].svBtn}</a>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent('總結 ' + name + ' 的 Google 評論與評價'}" target="_blank" class="btn-action btn-gmap" style="grid-column: span 2;">⭐ 總結評論</a>
+                            <a href="${googleSearchUrl}" target="_blank" class="btn-action btn-gmap">${i18n[currentLang].gmapBtn}</a>
                             <a href="${ytUrl}" target="_blank" class="btn-action btn-yt">▶️ ${i18n[currentLang].ytBtn}</a>
                         </div>
-                        <div class="sv-warning">*(Google街景若全黑代表該座標無全景影像</div>
+                        <div class="sv-warning">*(Google街景若全黑代表該座標無全景影像)</div>
                     </div>
                 `;
                 
-                let marker = L.marker([poi.lat, poi.lng], { icon: customIcon };
-                marker.bindPopup(popupHtml.addTo(markerGroup;
+                let marker = L.marker([poi.lat, poi.lng], { icon: customIcon });
+                marker.bindPopup(popupHtml).addTo(markerGroup);
                 
-                marker.on('popupopen', function( {
-                    fetch(`https://api.counterapi.dev/v1/animemap_v10_para/${safeId}/`
-                        .then(r => r.json(
+                marker.on('popupopen', function() {
+                    fetch(`https://api.counterapi.dev/v1/animemap_v10_para/${safeId}/`)
+                        .then(r => r.json())
                         .then(data => {
                             let count = data.count || 0;
-                            const popupNode = marker.getPopup(.getElement(;
-                            if(popupNode {
-                                const countSpan = popupNode.querySelector('.l-count';
-                                if(countSpan countSpan.innerText = count;
+                            const popupNode = marker.getPopup().getElement();
+                            if(popupNode) {
+                                const countSpan = popupNode.querySelector('.l-count');
+                                if(countSpan) countSpan.innerText = count;
                             }
-                        }.catch((=>{};
-                };
-            };
+                        }).catch(()=>{});
+                });
+            });
         }
-    
-        // --- 拖曳功能 (Draggable functionality ---
-        const controlsEl = document.getElementById('controls';
-        const headerEl = document.querySelector('.header-row';
-        
+
+        // 拖曳與收合功能
+        function toggleControls(e) {
+            if (e) e.stopPropagation();
+            const controls = document.getElementById('controls');
+            isCollapsed = !isCollapsed;
+            if(isCollapsed) {
+                controls.classList.remove('expanded');
+                controls.classList.add('collapsed');
+            } else {
+                controls.classList.remove('collapsed');
+                controls.classList.add('expanded');
+            }
+        }
+        document.getElementById('controls').addEventListener('click', function(e) {
+            if (isCollapsed) toggleControls();
+        });
+
+        const controlsEl = document.getElementById('controls');
+        const headerEl = document.querySelector('.header-row');
         let isDragging = false;
         let startX, startY, initialLeft, initialTop;
 
-        headerEl.addEventListener('pointerdown', (e => {
-            // 不要在點擊下拉或按鈕時觸發拖曳
-            if(e.target.tagName.toLowerCase( === 'button' || e.target.tagName.toLowerCase( === 'select' return;
-            
+        headerEl.addEventListener('pointerdown', (e) => {
+            if(e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'select' || e.target.classList.contains('minimized-icon')) return;
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
-            
-            // 獲取當前的位置
-            const rect = controlsEl.getBoundingClientRect(;
-            // 取消 translateX(-50% 以方便直接以 px 計算
+            const rect = controlsEl.getBoundingClientRect();
             controlsEl.style.transform = 'none';
             controlsEl.style.left = rect.left + 'px';
             controlsEl.style.top = rect.top + 'px';
-            controlsEl.style.width = controlsEl.offsetWidth + 'px'; // 鎖定寬度
-            
             initialLeft = rect.left;
             initialTop = rect.top;
-            
-            headerEl.setPointerCapture(e.pointerId;
-            e.preventDefault(;
-        };
+            headerEl.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        });
 
-        headerEl.addEventListener('pointermove', (e => {
-            if (!isDragging return;
+        headerEl.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            controlsEl.style.left = (initialLeft + dx + 'px';
-            controlsEl.style.top = (initialTop + dy + 'px';
-        };
+            controlsEl.style.left = (initialLeft + dx) + 'px';
+            controlsEl.style.top = (initialTop + dy) + 'px';
+        });
 
-        headerEl.addEventListener('pointerup', (e => {
+        headerEl.addEventListener('pointerup', (e) => {
             isDragging = false;
-            headerEl.releasePointerCapture(e.pointerId;
-        };
-        headerEl.addEventListener('pointercancel', (e => {
+            headerEl.releasePointerCapture(e.pointerId);
+        });
+        headerEl.addEventListener('pointercancel', (e) => {
             isDragging = false;
-            headerEl.releasePointerCapture(e.pointerId;
-        };
-
-</script>
+            headerEl.releasePointerCapture(e.pointerId);
+        });
+    </script>
 </body>
 </html>
