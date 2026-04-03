@@ -186,7 +186,7 @@
                 });
 
                 const svUrl = DOMPurify.sanitize(`https://www.google.com/maps?layer=c&cbll=${poi.lat},${poi.lng}`);
-                const ytUrl = DOMPurify.sanitize(poi.ytLink || `https://www.youtube.com/results?search_query=${encodeURIComponent((poi.anime||'') + ' ' + (poi.location||'') + ' 聖地巡禮 vlog')}`);
+                const ytUrl = DOMPurify.sanitize(poi.ytLink || `https://www.youtube.com/results?search_query=${encodeURIComponent((poi.anime||'') + ' ' + (poi.location||'') + ' vlog')}`);
                 const safeId = DOMPurify.sanitize(poi.id || String(Math.random()).replace('.',''));
                 const episodeTag = poi.episode ? `<span class="tag">${DOMPurify.sanitize(poi.episode)}</span>` : (poi.category === 'gourmet' ? `<span class="tag">🍣 美食</span>` : `<span class="tag">📍 景點</span>`);
 
