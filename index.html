@@ -13,8 +13,71 @@
         :root { --ruri-blue: #1E50A2; --sakura-pink: #FEDFE1; --uguisu-green: #838A2D; --akane-red: #B7282E; --washi-bg: #F9F8F4; --text-main: #2C2C2C; --gold-star: #F5A623; }
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Noto Sans TC', sans-serif; background: var(--washi-bg); overflow: hidden; color: var(--text-main); }
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; width: 100%; height: 100%; z-index: 1; }
-        #controls { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); touch-action: none; z-index: 1000; background: rgba(249, 248, 244, 0.95); padding: 15px 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 450px; box-sizing: border-box; border-top: 4px solid var(--ruri-blue); backdrop-filter: blur(8px); transition: all 0.3s ease; }
-        .header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 2px; border-bottom: 1px solid transparent; } .header-row:active { cursor: grabbing; }
+        
+        /* 懸浮控制列 (支援最小化成圖標) */
+        #controls {
+            position: absolute;
+            top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000;
+            background: rgba(249, 248, 244, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column; gap: 10px;
+            width: 90%; max-width: 450px;
+            box-sizing: border-box;
+            border-top: 4px solid var(--ruri-blue);
+            backdrop-filter: blur(8px);
+            transition: max-width 0.3s, padding 0.3s, border-radius 0.3s, opacity 0.3s;
+            overflow: hidden; /* 防止內容溢出 */
+            touch-action: none;
+        }
+
+        /* 展開狀態的內距 */
+        #controls.expanded {
+            padding: 15px 20px;
+        }
+
+        /* 最小化狀態：變成一顆圓形 Icon */
+        #controls.collapsed {
+            width: 50px !important;
+            height: 50px !important;
+            max-width: 50px !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            background: var(--ruri-blue);
+        }
+
+        .header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 2px;}
+        .header-row:active { cursor: grabbing; }
+        
+        /* 隱藏內容的切換類別 */
+        #controls.collapsed .header-row,
+        #controls.collapsed #filter-container {
+            display: none !important;
+        }
+
+        /* 最小化時顯示的地圖圖標 */
+        .minimized-icon {
+            display: none;
+            color: white;
+            font-size: 24px;
+        }
+        #controls.collapsed .minimized-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; height: 100%;
+        }
+
+        #filter-container { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        
+        /* 收折按鈕 */
+        .toggle-btn { background: none; border: none; font-size: 16px; cursor: pointer; padding: 0 5px; margin-left: 5px; }
+.header-row { display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-bottom: 2px; border-bottom: 1px solid transparent; } .header-row:active { cursor: grabbing; }
         h3 { margin: 0; font-family: 'Noto Serif JP', serif; font-size: 18px; color: var(--ruri-blue); }
         .lang-switch { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px; font-size: 12px; cursor: pointer; }
         select { font-family: 'Noto Sans TC'; font-size: 14px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; outline: none; cursor: pointer; background: #fff; width: 100%;}
@@ -51,30 +114,36 @@
     </style>
 </head>
 <body>
-    <div id="controls">
+    <div id="controls" class="expanded">
+        <!-- 最小化時的圖標 (點擊會展開) -->
+        <div class="minimized-icon" onclick="toggleControls()" title="展開選單">🗺️</div>
+        
         <div class="header-row">
-            <div style="display:flex; align-items:center; gap:8px;"><span style="color:#aaa; font-size:12px;">🖐️</span><h3 id="t-title" style="pointer-events:none;">🇯🇵 日本深度導覽地圖</h3></div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="color:#aaa; font-size:12px;">🖐️</span>
+                <h3 id="t-title" style="pointer-events:none;">🇯🇵 日本深度導覽地圖</h3>
+            </div>
             <div style="display: flex; align-items: center;">
                 <select class="lang-switch" id="lang-select" onchange="changeLang()">
                     <option value="zh">繁體中文</option>
                     <option value="en">English</option>
                     <option value="ja">日本語</option>
                 </select>
-                <button class="toggle-btn" onclick="toggleControls()" id="toggle-icon">🔽</button>
+                <button class="toggle-btn" onclick="toggleControls()" id="toggle-icon" title="縮小為圖標">🔽</button>
             </div>
         </div>
         <div id="filter-container">
-        <select id="cat-filter" onchange="renderMap()">
-            <option value="all" id="t-cat-all">🌸 所有分類 (All Categories)</option>
-            <option value="anime" id="t-cat-anime">🎬 動漫聖地 (Anime Pilgrimages)</option>
-            <option value="history" id="t-cat-history">🏯 歷史古蹟 (Historical Sites)</option>
-            <option value="nature" id="t-cat-nature">🌲 大自然絕景 (Nature & Seasons)</option>
-            <option value="gourmet" id="t-cat-gourmet">🍣 在地美食 (Gourmet)</option>
-        </select>
-        <select id="route-filter" onchange="renderMap()">
-            <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore)</option>
-            <!-- Routes injected by JS -->
-        </select>
+            <select id="cat-filter" onchange="renderMap()">
+                <option value="all" id="t-cat-all">🌸 所有分類 (All Categories)</option>
+                <option value="anime" id="t-cat-anime">🎬 動漫聖地 (Anime Pilgrimages)</option>
+                <option value="history" id="t-cat-history">🏯 歷史古蹟 (Historical Sites)</option>
+                <option value="nature" id="t-cat-nature">🌲 大自然絕景 (Nature & Seasons)</option>
+                <option value="gourmet" id="t-cat-gourmet">🍣 在地美食 (Gourmet)</option>
+            </select>
+            <select id="route-filter" onchange="renderMap()">
+                <option value="none" id="t-route-none">🗺️ 自由探索 (Free Explore)</option>
+                <!-- Routes injected by JS -->
+            </select>
         </div>
     </div>
     <div id="map"></div>
@@ -90,12 +159,15 @@
         let isCollapsed = false;
         function toggleControls() {
             const controls = document.getElementById('controls');
-            const icon = document.getElementById('toggle-icon');
             isCollapsed = !isCollapsed;
             if(isCollapsed) {
+                controls.classList.remove('expanded');
                 controls.classList.add('collapsed');
-                icon.innerText = '◀️';
             } else {
+                controls.classList.remove('collapsed');
+                controls.classList.add('expanded');
+            }
+        } else {
                 controls.classList.remove('collapsed');
                 icon.innerText = '🔽';
             }
