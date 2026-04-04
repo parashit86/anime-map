@@ -5875,6 +5875,69 @@
       "animeImg": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Furukawa_Fish_Market.jpg/800px-Furukawa_Fish_Market.jpg",
       "imageSource": "Wikimedia Commons",
       "sourceUrl": "https://commons.wikimedia.org/"
+    },
+    {
+      "id": "w1",
+      "lat": 42.866,
+      "lng": 140.7063,
+      "category": "nature",
+      "region": "hokkaido",
+      "season": "winter",
+      "name_zh": "二世谷 滑雪場 (Niseko)",
+      "name_en": "Niseko Ski Resort",
+      "name_ja": "ニセコ スキーリゾート",
+      "desc_zh": "全球知名的粉雪天堂 (Japow)，除了極致滑雪體驗，還能一覽羊蹄山的壯麗雪景。周邊有超多適合包棟的溫泉別墅與歐風小木屋。",
+      "img": "https://images.unsplash.com/photo-1547849646-9cf4c6f37ee0?w=600&q=80",
+      "animeImg": "https://images.unsplash.com/photo-1547849646-9cf4c6f37ee0?w=600&q=80",
+      "source": "Unsplash",
+      "imageSource": "Unsplash",
+      "sourceUrl": "https://unsplash.com/",
+      "rating": 4.9,
+      "reviewCount": 3850,
+      "sampleReview": "「粉雪的品質真的是世界第一！而且附近超多異國美食，滑完雪吃碗熱騰騰的湯咖哩簡直是升天！」",
+      "ytLink": "https://www.youtube.com/results?search_query=Niseko%20%E4%BA%8C%E4%B8%96%E8%B0%B7%20%E6%BB%91%E9%9B%AA%20vlog"
+    },
+    {
+      "id": "w2",
+      "lat": 36.757,
+      "lng": 138.4552,
+      "category": "nature",
+      "region": "chubu",
+      "season": "winter",
+      "name_zh": "白馬八方尾根滑雪場 (Hakuba)",
+      "name_en": "Hakuba Happo-One Snow Resort",
+      "name_ja": "白馬八方尾根スキー場",
+      "desc_zh": "1998年冬季奧運的舉辦地，雪道多樣且刺激。除了滑雪，當地的野澤溫泉和烤蕎麥包子也絕對不容錯過。",
+      "img": "https://images.unsplash.com/photo-1610410712726-258baebbc96a?w=600&q=80",
+      "animeImg": "https://images.unsplash.com/photo-1610410712726-258baebbc96a?w=600&q=80",
+      "source": "Unsplash",
+      "imageSource": "Unsplash",
+      "sourceUrl": "https://unsplash.com/",
+      "rating": 4.7,
+      "reviewCount": 2100,
+      "sampleReview": "「雪道選擇超級多，從新手到老手都能玩得很盡興。山頂的風景非常震撼！」",
+      "ytLink": "https://www.youtube.com/results?search_query=%E7%99%BD%E9%A6%AC%20%E5%85%AB%E6%96%B9%E5%B0%BE%E6%A0%B9%20%E6%BB%91%E9%9B%AA%20vlog"
+    },
+    {
+      "id": "n2",
+      "lat": 35.1587,
+      "lng": 139.0621,
+      "category": "nature",
+      "region": "kanto",
+      "season": "spring",
+      "name_zh": "小田原城 (賞櫻名所)",
+      "name_en": "Odawara Castle (Cherry Blossoms)",
+      "name_ja": "小田原城 (桜)",
+      "desc_zh": "春季限定！白色城池搭配滿開的粉色櫻花，是關東近郊最經典的歷史賞櫻名所，很適合搭配鎌倉與箱根行程。",
+      "img": "https://images.unsplash.com/photo-1554378135-24e5ef9d8d67?w=600&q=80",
+      "animeImg": "https://images.unsplash.com/photo-1554378135-24e5ef9d8d67?w=600&q=80",
+      "source": "Unsplash",
+      "imageSource": "Unsplash",
+      "sourceUrl": "https://unsplash.com/",
+      "rating": 4.5,
+      "reviewCount": 1850,
+      "sampleReview": "「櫻花季來這裡真的美到哭！而且外國觀光客相對沒那麼多，城下的護城河拍起來超有詩意。」",
+      "ytLink": "https://www.youtube.com/results?search_query=%E5%B0%8F%E7%94%B0%E5%8E%9F%E5%9F%8E%20%E8%B3%9E%E6%AB%BB%20vlog"
     }
   ],
   "itineraries": [
@@ -5911,6 +5974,15 @@
         "p_furukawa",
         "p_oirase",
         "p_oirase"
+      ]
+    },
+    {
+      "id": "tour_niseko_winter",
+      "name_zh": "北海道 3 日：二世谷粉雪與美食",
+      "name_en": "Hokkaido 3-Day: Niseko Powder Snow",
+      "name_ja": "北海道3日間：ニセコパウダースノー",
+      "route": [
+        "w1"
       ]
     }
   ]
