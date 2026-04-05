@@ -76,7 +76,7 @@
         .btn-action:hover { opacity: 0.9; }
         .btn-like { background: #fff; border: 1px solid #ddd; color: var(--akane-red); }
         .btn-like.liked { background: var(--sakura-pink); border-color: var(--akane-red); }
-        .btn-sv { background: #4285F4; }
+        .btn-sv:hover { background: #f9f9f9; } .btn-yt:hover { background: #f9f9f9; }
         .btn-gmap { background: #34A853; grid-column: span 2;}
         .btn-yt { background: #FF0000; grid-column: span 2; font-size: 13px;}
         .sv-warning { font-size: 11px; color: #999; text-align: center; margin-top: 5px; }
@@ -267,9 +267,13 @@
                         <div class="source-text">圖片來源: <a href="${sanitizeStr(poi.sourceUrl||'#')}" target="_blank">${sanitizeStr(poi.imageSource||'網路')}</a></div>
                         <div class="popup-desc"><b>📖 景點解說：</b><br>${sanitizeStr(desc)}</div>
                         <div class="popup-review"><span style="font-size: 16px;">💬</span><div><b>精選評價：</b><br>"${sanitizeStr(review)}"</div></div>
-                        <div class="btn-grid" style="grid-template-columns: 1fr;">
-                            <a href="${svUrl}" target="_blank" class="btn-action btn-sv">🗺️ ${i18n[currentLang].svBtn}</a>
-                            <a href="${ytUrl}" target="_blank" class="btn-action btn-yt">▶️ ${i18n[currentLang].ytBtn}</a>
+                        <div class="btn-grid" style="flex-direction: row; gap: 10px;">
+                            <a href="${ytUrl}" target="_blank" class="btn-action btn-yt" style="flex: 1; padding: 6px 0; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05); color: inherit;" title="${i18n[currentLang].ytBtn}">
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="#FF0000"><path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.254,4,12,4,12,4S5.746,4,4.186,4.418c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.746,2,12,2,12s0,4.254,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768C5.746,20,12,20,12,20s6.254,0,7.814-0.418c0.86-0.23,1.538-0.908,1.768-1.768C22,16.254,22,12,22,12S22,7.746,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"></path></svg>
+                            </a>
+                            <a href="${svUrl}" target="_blank" class="btn-action btn-sv" style="flex: 1; padding: 6px 0; background: #fff; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05); color: inherit;" title="${i18n[currentLang].svBtn}">
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="#F4B400"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+                            </a>
                         </div>
                         <div class="sv-warning">*(Google街景若全黑代表該座標無全景影像)</div>
                     </div>
