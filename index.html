@@ -177,10 +177,15 @@
                 document.getElementById('t-cat-all').innerText = "⚠️ 載入失敗 (請重整)";
             });
 
+        function getLikedSpots() { return JSON.parse(localStorage.getItem('likedSpots') || '{}'); }
+        function setLikedSpot(spotId) { let likes = getLikedSpots(); likes[spotId] = true; localStorage.setItem('likedSpots', JSON.stringify(likes)); }
+
         window.handleLike = function(btn, id) {
-            btn.classList.add('liked');
+            if (getLikedSpots()[id]) { alert("您已經對這個景點按過愛心囉！"); return; }
+            btn.querySelector('.like-icon').innerText = '❤️';
             let countSpan = btn.querySelector('.l-count');
             if (countSpan) countSpan.innerText = parseInt(countSpan.innerText) + 1;
+            setLikedSpot(id);
             fetch(`https://api.counterapi.dev/v1/animemap_v10_para/${id}/up`).catch(()=>{});
         }
         
@@ -264,9 +269,14 @@
                     <div class="popup-header"><span>${sanitizeStr(poi.anime || '精選推薦')}</span>${episodeTag}</div>
                     <div class="popup-body">
                         <div class="popup-loc">${cleanName}</div>
-                        <a href="${googleSearchUrl}" target="_blank" style="text-decoration: none; display: block; margin-bottom: 10px;" title="點擊查看 Google 評論">
-                            <div class="rating-row" style="margin-bottom: 0;"><span class="stars">${getStars(rating)}</span> <span style="color: #4285F4; text-decoration: underline;">${rating} (${rCount} ${i18n[currentLang].reviewTitle})</span></div>
-                        </a>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <a href="${googleSearchUrl}" target="_blank" style="text-decoration: none;" title="點擊查看 Google 評論">
+                                <div class="rating-row" style="margin-bottom: 0;"><span class="stars">${getStars(rating)}</span> <span style="color: #4285F4; text-decoration: underline;">${rating} (${rCount} ${i18n[currentLang].reviewTitle})</span></div>
+                            </a>
+                            <button class="like-btn" id="btn-${safeId}" onclick="handleLike(this, '${safeId}')" title="推薦這個景點！" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 14px; padding: 4px 8px; border-radius: 12px; transition: background 0.2s;">
+                                <span class="like-icon" style="font-size: 18px;">🤍</span> <span class="l-count" style="color: #666; font-weight: bold;">0</span>
+                            </button>
+                        </div>
                         <div class="anime-img-box"><img class="popup-img" src="${safeImg}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${safeFallback}';"></div>
                         <div class="source-text">圖片來源: <a href="${sanitizeStr(poi.sourceUrl||'#')}" target="_blank">${sanitizeStr(poi.imageSource||'網路')}</a></div>
                         <div class="popup-desc"><b>📖 景點解說：</b><br>${sanitizeStr(desc)}</div>
@@ -295,6 +305,10 @@
                             if(popupNode) {
                                 const countSpan = popupNode.querySelector('.l-count');
                                 if(countSpan) countSpan.innerText = count;
+                                if(getLikedSpots()[safeId]) {
+                                    const icon = popupNode.querySelector('.like-icon');
+                                    if(icon) icon.innerText = '❤️';
+                                }
                             }
                         }).catch(()=>{});
                 });
