@@ -259,7 +259,7 @@
                 const episodeTag = poi.episode ? `<span class="tag">${sanitizeStr(poi.episode)}</span>` : (poi.category === 'gourmet' ? `<span class="tag">🍣 美食</span>` : `<span class="tag">📍 景點</span>`);
                 
                 const cleanName = sanitizeStr(name.replace(/^\[.*?\]\s*/, ''));
-                const googleSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cleanName + ' 日本')}`;
+                const googleSearchUrl = `https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}`;
 
                 const rating = poi.rating || 4.5;
                 const rCount = poi.reviewCount || 128;
