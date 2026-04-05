@@ -71,7 +71,7 @@
         .popup-desc { font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.5; background: #fff; padding: 10px; border-left: 3px solid var(--ruri-blue); border-radius: 0 4px 4px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); max-height: 100px; overflow-y: auto;}
         .popup-review { font-size: 12px; color: #666; font-style: italic; background: #f0f0f0; padding: 10px; border-radius: 6px; margin-bottom: 15px; display: flex; gap: 8px; align-items: flex-start;}
         
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .btn-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
         .btn-action { display: flex; justify-content: center; align-items: center; gap: 5px; width: 100%; text-align: center; color: white; padding: 10px 5px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; transition: opacity 0.2s; border: none; cursor: pointer;}
         .btn-action:hover { opacity: 0.9; }
         .btn-like { background: #fff; border: 1px solid #ddd; color: var(--akane-red); }
@@ -267,10 +267,8 @@
                         <div class="source-text">圖片來源: <a href="${sanitizeStr(poi.sourceUrl||'#')}" target="_blank">${sanitizeStr(poi.imageSource||'網路')}</a></div>
                         <div class="popup-desc"><b>📖 景點解說：</b><br>${sanitizeStr(desc)}</div>
                         <div class="popup-review"><span style="font-size: 16px;">💬</span><div><b>精選評價：</b><br>"${sanitizeStr(review)}"</div></div>
-                        <div class="btn-grid">
-                            <button class="btn-action btn-like" onclick="handleLike(this, '${safeId}')">🤍 <span class="l-count">0</span> ${i18n[currentLang].likeBtn}</button>
+                        <div class="btn-grid" style="grid-template-columns: 1fr;">
                             <a href="${svUrl}" target="_blank" class="btn-action btn-sv">🗺️ ${i18n[currentLang].svBtn}</a>
-                            <a href="${googleSearchUrl}" target="_blank" class="btn-action btn-gmap">${i18n[currentLang].gmapBtn}</a>
                             <a href="${ytUrl}" target="_blank" class="btn-action btn-yt">▶️ ${i18n[currentLang].ytBtn}</a>
                         </div>
                         <div class="sv-warning">*(Google街景若全黑代表該座標無全景影像)</div>
