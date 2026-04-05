@@ -262,7 +262,9 @@
                     <div class="popup-header"><span>${sanitizeStr(poi.anime || '精選推薦')}</span>${episodeTag}</div>
                     <div class="popup-body">
                         <div class="popup-loc">${cleanName}</div>
-                        <div class="rating-row"><span class="stars">${getStars(rating)}</span> <span>${rating} (${rCount} ${i18n[currentLang].reviewTitle})</span></div>
+                        <a href="${googleSearchUrl}" target="_blank" style="text-decoration: none; display: block; margin-bottom: 10px;" title="點擊查看 Google 評論">
+                            <div class="rating-row" style="margin-bottom: 0;"><span class="stars">${getStars(rating)}</span> <span style="color: #4285F4; text-decoration: underline;">${rating} (${rCount} ${i18n[currentLang].reviewTitle})</span></div>
+                        </a>
                         <div class="anime-img-box"><img class="popup-img" src="${safeImg}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${safeFallback}';"></div>
                         <div class="source-text">圖片來源: <a href="${sanitizeStr(poi.sourceUrl||'#')}" target="_blank">${sanitizeStr(poi.imageSource||'網路')}</a></div>
                         <div class="popup-desc"><b>📖 景點解說：</b><br>${sanitizeStr(desc)}</div>
