@@ -64,7 +64,15 @@
         .sales-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
         .sales-bar-bg { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
         .sales-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); border-radius: 4px; }
-    </style>
+    
+        th.sortable { cursor: pointer; user-select: none; position: relative; padding-right: 20px;}
+        th.sortable::after { content: '↕'; position: absolute; right: 5px; color: #64748b; font-size: 12px; }
+        th.sortable.asc::after { content: '↑'; color: var(--accent-cyan); }
+        th.sortable.desc::after { content: '↓'; color: var(--accent-cyan); }
+        .asus-highlight { background-color: rgba(59, 130, 246, 0.2) !important; border-left: 4px solid var(--accent-blue); }
+        .sales-bar-container.asus-highlight .sales-header span { color: var(--accent-cyan); font-weight: bold; }
+        .sales-bar-container.asus-highlight .sales-bar-fill { background: linear-gradient(90deg, #2563eb, #06b6d4); }
+</style>
 </head>
 <body>
     <div class="navbar">
@@ -105,9 +113,9 @@
                                 <th>品牌與型號</th>
                                 <th>核心平台</th>
                                 <th>螢幕規格</th>
-                                <th>US 北美市價</th>
-                                <th>TW 台灣市價</th>
-                                <th>CN 中國市價</th>
+                                <th class="sortable" onclick="sortTable('us')">US 北美市價</th>
+                                <th class="sortable" onclick="sortTable('tw')">TW 台灣市價</th>
+                                <th class="sortable" onclick="sortTable('cn')">CN 中國市價</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -202,7 +210,14 @@
             renderDashboard(input);
         }
 
+        
+        let currentData = null;
+        let currentModel = "";
+        let sortCol = "";
+        let sortAsc = true;
+
         function renderDashboard(modelName) {
+            currentModel = modelName;
             document.getElementById('targetModelName').innerText = modelName;
             
             let type = 'zenbook';
@@ -210,28 +225,59 @@
             if (lower.includes('rog') || lower.includes('zephyrus') || lower.includes('strix') || lower.includes('scar')) {
                 type = 'rog';
             }
-            // You can add 'vivobook', 'expertbook' logic here in the future
             
-            const data = archetypes[type];
+            currentData = JSON.parse(JSON.stringify(archetypes[type])); // Deep copy
+            drawTable();
+            drawChart();
+            drawAdvice();
+        }
+
+        function extractNumber(str) {
+            if (typeof str === 'number') return str;
+            return parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+        }
+
+        function sortTable(col) {
+            if (sortCol === col) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = col;
+                sortAsc = true;
+            }
             
-            // Render Table
+            // Update UI headers
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('asc', 'desc');
+                if(th.textContent.toLowerCase().includes(col)) th.classList.add(sortAsc ? 'asc' : 'desc');
+            });
+
+            // Sort competitors
+            currentData.competitors.sort((a, b) => {
+                let valA = col === 'us' ? a.street_us : col === 'tw' ? extractNumber(a.street_tw) : extractNumber(a.street_cn);
+                let valB = col === 'us' ? b.street_us : col === 'tw' ? extractNumber(b.street_tw) : extractNumber(b.street_cn);
+                return sortAsc ? valA - valB : valB - valA;
+            });
+            drawTable();
+        }
+
+        function drawTable() {
             const tbody = document.querySelector('#specsTable tbody');
             let html = `
-                <tr class="target-row">
-                    <td>👑 ASUS ${modelName}</td>
-                    <td>${data.targetBase.cpu}</td>
-                    <td>${data.targetBase.screen}</td>
+                <tr class="asus-highlight target-row">
+                    <td>👑 ASUS ${currentModel}</td>
+                    <td>${currentData.targetBase.cpu}</td>
+                    <td>${currentData.targetBase.screen}</td>
                     <td>
-                        <span class="price-msrp">$${data.targetBase.msrp_us}</span>
-                        <span class="price-street">$${data.targetBase.street_us}</span>
+                        <span class="price-msrp">$${currentData.targetBase.msrp_us}</span>
+                        <span class="price-street">$${currentData.targetBase.street_us}</span>
                     </td>
-                    <td><span class="price-street">${data.targetBase.street_tw}</span></td>
-                    <td><span class="price-street">${data.targetBase.street_cn}</span></td>
+                    <td><span class="price-street">${currentData.targetBase.street_tw}</span></td>
+                    <td><span class="price-street">${currentData.targetBase.street_cn}</span></td>
                 </tr>
             `;
             
-            data.competitors.forEach(c => {
-                const threatClass = (c.street_us < data.targetBase.street_us - 100) ? 'danger' : '';
+            currentData.competitors.forEach(c => {
+                const threatClass = (c.street_us < currentData.targetBase.street_us - 100) ? 'danger' : '';
                 html += `
                     <tr>
                         <td>${c.brand} ${c.name}</td>
@@ -247,44 +293,53 @@
                 `;
             });
             tbody.innerHTML = html;
+        }
 
-            // Render Sales Chart
+        function drawChart() {
             const chartEl = document.getElementById('salesChart');
             let chartHtml = '';
             
-            // Add ASUS
-            chartHtml += `
-                <div class="sales-bar-container">
-                    <div class="sales-header">
-                        <span style="font-weight:bold; color:var(--accent-cyan);">ASUS</span>
-                        <span>16% Est. Share</span>
-                    </div>
-                    <div class="sales-bar-bg">
-                        <div class="sales-bar-fill" style="width: 16%;"></div>
-                    </div>
-                </div>
-            `;
+            // Combine ASUS with competitors for unified sorting
+            let allBrands = [...currentData.competitors];
+            allBrands.push({ brand: "ASUS " + currentModel, share: 16, isAsus: true });
             
-            // Add Competitors
-            data.competitors.sort((a,b)=>b.share - a.share).forEach(c => {
-                chartHtml += `
-                    <div class="sales-bar-container">
-                        <div class="sales-header">
-                            <span>${c.brand}</span>
-                            <span>${c.share}% Est. Share</span>
+            // Sort by share descending
+            allBrands.sort((a, b) => b.share - a.share);
+            
+            allBrands.forEach(c => {
+                if (c.isAsus) {
+                    chartHtml += `
+                        <div class="sales-bar-container asus-highlight" style="padding: 5px; border-radius: 4px;">
+                            <div class="sales-header">
+                                <span>${c.brand}</span>
+                                <span>${c.share}% Est. Share</span>
+                            </div>
+                            <div class="sales-bar-bg">
+                                <div class="sales-bar-fill" style="width: ${c.share}%;"></div>
+                            </div>
                         </div>
-                        <div class="sales-bar-bg">
-                            <div class="sales-bar-fill" style="width: ${c.share}%; background: #475569;"></div>
+                    `;
+                } else {
+                    chartHtml += `
+                        <div class="sales-bar-container">
+                            <div class="sales-header">
+                                <span>${c.brand}</span>
+                                <span>${c.share}% Est. Share</span>
+                            </div>
+                            <div class="sales-bar-bg">
+                                <div class="sales-bar-fill" style="width: ${c.share}%; background: #475569;"></div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             });
             chartEl.innerHTML = chartHtml;
+        }
 
-            // Render AI Advice
+        function drawAdvice() {
             const adviceEl = document.getElementById('aiAdvice');
             let adviceHtml = '';
-            data.advice.forEach(a => {
+            currentData.advice.forEach(a => {
                 adviceHtml += `
                     <div class="ai-card ${a.color}">
                         <h4>${a.icon} ${a.ai}</h4>
@@ -294,8 +349,7 @@
             });
             adviceEl.innerHTML = adviceHtml;
         }
-
-        // Run once on load with default
+// Run once on load with default
         setTimeout(() => startAnalysis(), 500);
     </script>
 </body>
