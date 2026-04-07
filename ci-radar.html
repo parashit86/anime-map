@@ -142,10 +142,8 @@
                     <option value="tw" selected>🇹🇼 台灣市場 (TWD)</option>
                     <option value="cn">🇨🇳 中國市場 (CNY)</option>
                 </select>
-                <input type="text" id="modelInput" list="asusModels" placeholder="e.g. Zenbook S 14 UX3407" value="Zenbook S 14 UX3407">
-                <datalist id="asusModels">
-                    <!-- Fetched dynamically from asus_products.json -->
-                </datalist>
+                <select id="modelInput" class="country-select" style="flex: 1;"><option value="Zenbook S 14 UX3407">正在連線爬蟲抓取最新機型...</option></select>
+                
                 <button class="action-btn" onclick="startAnalysis()">📡 Start Analysis</button>
             </div>
             <div style="margin-top: 10px; font-size: 12px; color: #64748b; text-align: left; padding-left: 20px;">
@@ -252,11 +250,13 @@
                 // Add timestamp to bust cache
                 const response = await fetch('asus_products.json?v=' + new Date().getTime());
                 const products = await response.json();
-                const dataList = document.getElementById('asusModels');
+                const modelSelect = document.getElementById('modelInput');
+                modelSelect.innerHTML = '';
                 products.forEach(p => {
                     const option = document.createElement('option');
                     option.value = p.model;
-                    dataList.appendChild(option);
+                    option.textContent = `【${p.series}】${p.model}`;
+                    modelSelect.appendChild(option);
                 });
             } catch (err) {
                 console.error("Failed to load local ASUS crawler JSON:", err);
