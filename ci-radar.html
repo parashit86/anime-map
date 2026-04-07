@@ -391,9 +391,9 @@
             document.getElementById('priceHeader').classList.remove('asc', 'desc');
             document.getElementById('ageHeader').classList.remove('asc', 'desc');
             
-            // Default sort by price
+            // Default sort by price: High to Low (Descending)
             sortCol = "price";
-            sortAsc = false; // will become true
+            sortAsc = true; // sortTable will flip this to false (Descending)
             sortTable('price');
             
             drawChart();
