@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>ASUS Global C.I. Radar (全球競爭情報雷達)</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <!-- 加入 Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -59,7 +59,6 @@
         th.sortable.asc::after { content: '↑'; color: var(--accent-cyan); }
         th.sortable.desc::after { content: '↓'; color: var(--accent-cyan); }
         
-        /* ASUS 專屬高光顏色 */
         .asus-highlight { background-color: rgba(59, 130, 246, 0.15) !important; border-left: 4px solid var(--accent-blue) !important; }
         .asus-highlight td { font-weight: bold; color: #bae6fd; }
         
@@ -83,7 +82,6 @@
         .sales-bar-bg { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
         .sales-bar-fill { height: 100%; background: #475569; border-radius: 4px; transition: width 0.5s ease-out;}
         
-        /* ASUS 在銷量圖表的高光 */
         .sales-bar-container.asus-highlight .sales-header span { color: var(--accent-cyan); font-weight: bold; }
         .sales-bar-container.asus-highlight .sales-bar-fill { background: linear-gradient(90deg, #2563eb, #06b6d4); }
         
@@ -91,18 +89,17 @@
         .age-tag.new { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
         .age-tag.old { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
 
-        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
         .modal-content { background-color: var(--bg-card); margin: 5% auto; padding: 25px; border: 1px solid #475569; width: 90%; max-width: 900px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative;}
         .close { color: #94a3b8; position: absolute; right: 20px; top: 15px; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s;}
         .close:hover { color: white; }
-    
+
         .pr-bar-bg { width: 100px; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; margin-top: 4px; }
         .pr-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-cyan), #3b82f6); border-radius: 3px; }
         .pr-text { font-size: 14px; font-weight: bold; color: var(--accent-cyan); }
         .asus-highlight .pr-text { color: #fff; }
         .asus-highlight .pr-bar-fill { background: #fff; }
-</style>
+    </style>
 </head>
 <body>
     <div class="navbar">
@@ -141,7 +138,6 @@
             <div class="card" style="margin-bottom: 20px;">
                 <h3>
                     <span>⚙️ 同級距硬體規格、產品週期與市價對標</span>
-                    <!-- 加入一年內價格曲線的按鈕 Icon -->
                     <span class="badge" onclick="openChartModal()" title="查看一年內市價波動曲線">📈 點此查看 1Y 價格波動曲線</span>
                 </h3>
                 <table id="specsTable">
@@ -150,7 +146,8 @@
                             <th>品牌與型號</th>
                             <th>核心平台</th>
                             <th>螢幕規格</th>
-                            <th id="ageHeader" class="sortable" onclick="sortTable('age')">開賣年月 (已銷售月數)</th>
+                            <th id="prHeader" class="sortable" onclick="sortTable('pr')">規格 PR 值</th>
+                            <th id="ageHeader" class="sortable" onclick="sortTable('age')">該國開賣日期 (已銷售月數)</th>
                             <th id="priceHeader" class="sortable" onclick="sortTable('price')">市價 (Street Price)</th>
                         </tr>
                     </thead>
@@ -323,7 +320,7 @@
         let currentCountry = "tw";
         
         let sortCol = "price";
-        let sortAsc = false; // true = ascending (low->high), false = descending (high->low)
+        let sortAsc = false;
 
         window.startAnalysis = async function() {
             const input = document.getElementById('modelInput').value.trim();
@@ -353,7 +350,6 @@
                 document.getElementById('targetMarketName').innerText = selectEl.options[selectEl.selectedIndex].text.split(' ')[1];
                 document.getElementById('chartTitleMarket').innerText = selectEl.options[selectEl.selectedIndex].text.split(' ')[1];
                 
-                // Re-trigger sort with current state to resort new country prices
                 sortAsc = !sortAsc; 
                 sortTable(sortCol);
                 drawChart(); 
@@ -412,10 +408,9 @@
                 name: currentModel,
                 cpu: rawData.targetBase.cpu,
                 screen: rawData.targetBase.screen,
+                pr: rawData.targetBase.pr,
                 age_us: rawData.targetBase.age_us,
                 age_tw: rawData.targetBase.age_tw,
-                pr: rawData.targetBase.pr,
-                pr: rawData.targetBase.pr,
                 age_cn: rawData.targetBase.age_cn,
                 msrp_us: rawData.targetBase.msrp_us,
                 street_us: rawData.targetBase.street_us,
@@ -431,10 +426,10 @@
             
             document.getElementById('priceHeader').classList.remove('asc', 'desc');
             document.getElementById('ageHeader').classList.remove('asc', 'desc');
+            document.getElementById('prHeader').classList.remove('asc', 'desc');
             
-            // PRE-SORT FIX: Force sorting by price, descending
             sortCol = "price";
-            sortAsc = true; // when sortTable is called, it flips to false (descending)
+            sortAsc = true; 
             sortTable('price');
             
             drawChart();
@@ -446,7 +441,7 @@
                 sortAsc = !sortAsc;
             } else {
                 sortCol = column;
-                sortAsc = true; // default to asc on new column, but 'price' initial is handled above
+                sortAsc = true; 
             }
             
             document.getElementById('priceHeader').classList.remove('asc', 'desc');
@@ -466,9 +461,6 @@
                 if (column === 'price') {
                     valA = a['street_' + currentCountry] || 0;
                     valB = b['street_' + currentCountry] || 0;
-                } else if (column === 'pr') {
-                    valA = a['pr'] || 0;
-                    valB = b['pr'] || 0;
                 } else if (column === 'age') {
                     valA = a['age_' + currentCountry] || 0;
                     valB = b['age_' + currentCountry] || 0;
@@ -524,7 +516,6 @@
             
             let allBrands = [...currentData.competitors];
             
-            // Sort by current country's Q2 share descending!
             allBrands.sort((a, b) => b['share_'+currentCountry].q2 - a['share_'+currentCountry].q2);
             
             allBrands.forEach(c => {
@@ -570,31 +561,21 @@
             adviceEl.innerHTML = adviceHtml;
         }
 
-        /* ----------------------------------------------------
-           NEW FEATURE: PRICE HISTORY CHART MODAL 
-           ---------------------------------------------------- */
         let priceChartInstance = null;
         let shareChartInstance = null;
 
         function generateShareHistory(q1Share, q2Share, ageMonths) {
-            // Generate a 12-month mock history representing market share
-            // We'll simulate a curve that transitions from Q1's share to Q2's share, 
-            // dropping to 0 if the product wasn't released yet.
             let history = [];
             for (let i = 0; i < 12; i++) {
                 let monthsAgo = 11 - i;
                 if (monthsAgo > ageMonths) {
-                    history.push(null); // Not released yet
+                    history.push(null);
                 } else {
-                    // Smooth transition from q1 (6 months ago) to q2 (current)
-                    // Just a mock algorithm for demonstration
                     let progress = 1 - (monthsAgo / 6); 
                     if (progress < 0) progress = 0;
                     if (progress > 1) progress = 1;
                     
                     let current = q1Share + ((q2Share - q1Share) * progress);
-                    
-                    // Add some random noise for realism
                     let noise = (Math.random() - 0.5) * 2; 
                     current += noise;
                     if (current < 0) current = 0;
@@ -693,7 +674,6 @@
         function generatePriceHistory(streetPrice, msrpPrice, ageMonths) {
             let history = [];
             
-            // Random seed generator based on prices so it's consistent for the same product
             let seed = streetPrice + msrpPrice + ageMonths;
             function random() {
                 let x = Math.sin(seed++) * 10000;
@@ -704,33 +684,24 @@
                 let monthsAgo = 11 - i;
                 
                 if (monthsAgo > ageMonths) {
-                    history.push(null); // Not released
+                    history.push(null);
                 } else if (monthsAgo === ageMonths) {
-                    history.push(msrpPrice); // Release month = MSRP
+                    history.push(msrpPrice);
                 } else if (monthsAgo === 0) {
-                    history.push(streetPrice); // Current month = Exact Street Price
+                    history.push(streetPrice);
                 } else {
-                    // Calculate a base linear drop
                     let progress = 1 - (monthsAgo / ageMonths);
                     let basePrice = msrpPrice - ((msrpPrice - streetPrice) * progress);
                     
-                    // Add volatility (jaggedness)
-                    // High volatility for older products, lower for newer
                     let volatilityMax = (msrpPrice - streetPrice) * 0.4; 
-                    
-                    // Simulate promotional dips (e.g. Black Friday, Back to School)
-                    let isPromoMonth = (i === 10 || i === 7 || i === 4); // Random promotional months
+                    let isPromoMonth = (i === 10 || i === 7 || i === 4);
                     let promoDrop = isPromoMonth ? volatilityMax * 0.8 : 0;
-                    
-                    let noise = (random() - 0.3) * volatilityMax; // Skewed slightly towards drops
+                    let noise = (random() - 0.3) * volatilityMax;
                     
                     let current = basePrice + noise - promoDrop;
-                    
-                    // Don't let it go higher than MSRP or lower than final street price by too much
                     if (current > msrpPrice) current = msrpPrice;
                     if (current < streetPrice * 0.85) current = streetPrice * 0.85;
                     
-                    // Round to neat numbers (e.g., end in 9 or 0)
                     history.push(Math.floor(current / 10) * 10 + 9);
                 }
             }
@@ -748,9 +719,8 @@
                 priceChartInstance.destroy();
             }
 
-            // Generate X-axis labels (Last 12 months)
             const labels = [];
-            const today = new Date(2026, 3, 1); // Mock today as April 2026
+            const today = new Date(2026, 3, 1);
             for (let i = 11; i >= 0; i--) {
                 let d = new Date(today.getFullYear(), today.getMonth() - i, 1);
                 labels.push(`${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}`);
@@ -773,7 +743,7 @@
                     borderColor: c.isAsus ? '#06b6d4' : colors[colorIdx++ % colors.length],
                     backgroundColor: 'transparent',
                     borderWidth: c.isAsus ? 4 : 2,
-                    borderDash: c.isAsus ? [] : [5, 5], // Competitors have dashed lines
+                    borderDash: c.isAsus ? [] : [5, 5],
                     tension: 0.2,
                     spanGaps: true
                 });
@@ -820,7 +790,6 @@
             document.getElementById('chartModal').style.display = 'none';
         };
         
-        // Close modal when clicking outside of it
         window.onclick = function(event) {
             const modalPrice = document.getElementById('chartModal');
             const modalShare = document.getElementById('shareModal');
