@@ -173,6 +173,16 @@
         </div>
     </div>
 
+    <!-- 市佔率曲線 Chart Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeShareModal()">&times;</span>
+            <h2 style="color: var(--accent-cyan); margin-top: 0;">📊 過去一年市佔率波動趨勢 (Market Share Trend)</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">*展示各品牌過去 12 個月在該地區的銷量佔比板塊推擠狀況。</p>
+            <canvas id="shareChartCanvas" style="max-height: 400px; width: 100%;"></canvas>
+        </div>
+    </div>
+
     <!-- 價格曲線 Chart Modal -->
     <div id="chartModal" class="modal">
         <div class="modal-content">
@@ -540,6 +550,121 @@
            NEW FEATURE: PRICE HISTORY CHART MODAL 
            ---------------------------------------------------- */
         let priceChartInstance = null;
+        let shareChartInstance = null;
+
+        function generateShareHistory(q1Share, q2Share, ageMonths) {
+            // Generate a 12-month mock history representing market share
+            // We'll simulate a curve that transitions from Q1's share to Q2's share, 
+            // dropping to 0 if the product wasn't released yet.
+            let history = [];
+            for (let i = 0; i < 12; i++) {
+                let monthsAgo = 11 - i;
+                if (monthsAgo > ageMonths) {
+                    history.push(null); // Not released yet
+                } else {
+                    // Smooth transition from q1 (6 months ago) to q2 (current)
+                    // Just a mock algorithm for demonstration
+                    let progress = 1 - (monthsAgo / 6); 
+                    if (progress < 0) progress = 0;
+                    if (progress > 1) progress = 1;
+                    
+                    let current = q1Share + ((q2Share - q1Share) * progress);
+                    
+                    // Add some random noise for realism
+                    let noise = (Math.random() - 0.5) * 2; 
+                    current += noise;
+                    if (current < 0) current = 0;
+                    
+                    history.push(current.toFixed(1));
+                }
+            }
+            return history;
+        }
+
+        window.openShareModal = function() {
+            if (!currentData || !currentData.competitors) return;
+            
+            const modal = document.getElementById('shareModal');
+            modal.style.display = 'block';
+            
+            const ctx = document.getElementById('shareChartCanvas').getContext('2d');
+            if (shareChartInstance) {
+                shareChartInstance.destroy();
+            }
+
+            const labels = [];
+            const today = new Date(2026, 3, 1); 
+            for (let i = 11; i >= 0; i--) {
+                let d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                labels.push(`${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}`);
+            }
+
+            const datasets = [];
+            const colors = ['#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#94a3b8'];
+            let colorIdx = 0;
+
+            let allBrands = [...currentData.competitors];
+            
+            allBrands.forEach((c) => {
+                const shareData = c['share_' + currentCountry];
+                const q1 = shareData.q1;
+                const q2 = shareData.q2;
+                const age = c['age_' + currentCountry];
+                
+                const history = generateShareHistory(q1, q2, age);
+                
+                datasets.push({
+                    label: c.isAsus ? "👑 " + c.brand : c.brand,
+                    data: history,
+                    borderColor: c.isAsus ? '#06b6d4' : colors[colorIdx++ % colors.length],
+                    backgroundColor: c.isAsus ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+                    borderWidth: c.isAsus ? 4 : 2,
+                    borderDash: c.isAsus ? [] : [5, 5],
+                    fill: c.isAsus ? true : false,
+                    tension: 0.4,
+                    spanGaps: true
+                });
+            });
+
+            shareChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc', font: { family: 'Noto Sans TC' } } },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        y: { 
+                            title: { display: true, text: '市佔率 (%)', color: '#94a3b8' },
+                            ticks: { color: '#94a3b8', callback: function(val) { return val + '%'; } }, 
+                            grid: { color: '#334155' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        };
+
+        window.closeShareModal = function() {
+            document.getElementById('shareModal').style.display = 'none';
+        };
 
         function generatePriceHistory(streetPrice, msrpPrice, ageMonths) {
             // Generate a 12-month mock history (0 = 11 months ago, 11 = current month)
@@ -645,10 +770,10 @@
         
         // Close modal when clicking outside of it
         window.onclick = function(event) {
-            const modal = document.getElementById('chartModal');
-            if (event.target == modal) {
-                closeChartModal();
-            }
+            const modalPrice = document.getElementById('chartModal');
+            const modalShare = document.getElementById('shareModal');
+            if (event.target == modalPrice) closeChartModal();
+            if (event.target == modalShare) closeShareModal();
         }
     </script>
 </body>
