@@ -129,7 +129,7 @@
                             <th>品牌與型號</th>
                             <th>核心平台</th>
                             <th>螢幕規格</th>
-                            <th id="ageHeader" class="sortable" onclick="sortTable('age')">該區上市時間 (Life Cycle)</th>
+                            <th id="ageHeader" class="sortable" onclick="sortTable('age')">該國開賣日期 (已銷售月數)</th>
                             <th id="priceHeader" class="sortable" onclick="sortTable('price')">市價 (Street Price)</th>
                         </tr>
                     </thead>
@@ -327,9 +327,22 @@
         }
         
         function formatAge(months) {
-            if (months <= 6) return `<span class="age-tag new">${months} 個月 (新品)</span>`;
-            if (months >= 18) return `<span class="age-tag old">${months} 個月 (衰退期)</span>`;
-            return `<span class="age-tag">${months} 個月 (成熟期)</span>`;
+            // Base Date: April 2026 (2026/04)
+            let year = 2026;
+            let month = 4 - months;
+            while (month <= 0) {
+                year -= 1;
+                month += 12;
+            }
+            const dateStr = `${year}/${month.toString().padStart(2, '0')}`;
+            
+            let tagClass = "";
+            let tagText = "";
+            if (months <= 6) { tagClass = "new"; tagText = "新品"; }
+            else if (months >= 18) { tagClass = "old"; tagText = "衰退期"; }
+            else { tagText = "成熟期"; }
+            
+            return `<div>${dateStr}</div><span class="age-tag ${tagClass}">已銷售 ${months} 個月 (${tagText})</span>`;
         }
 
         function renderDashboard(modelName) {
