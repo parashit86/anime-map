@@ -140,21 +140,23 @@
                     <span>⚙️ 同級距硬體規格、產品週期與市價對標</span>
                     <span class="badge" onclick="openChartModal()" title="查看一年內市價波動曲線">📈 點此查看 1Y 價格波動曲線</span>
                 </h3>
-                <table id="specsTable">
-                    <thead>
-                        <tr>
-                            <th>品牌與型號</th>
-                            <th>核心平台</th>
-                            <th>螢幕規格</th>
-                            <th id="prHeader" class="sortable" onclick="sortTable('pr')">規格 PR 值</th>
-                            <th id="ageHeader" class="sortable" onclick="sortTable('age')">該國開賣日期 (已銷售月數)</th>
-                            <th id="priceHeader" class="sortable" onclick="sortTable('price')">市價 (Street Price)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Injected by JS -->
-                    </tbody>
-                </table>
+                <div style="overflow-x: auto;">
+                    <table id="specsTable">
+                        <thead>
+                            <tr>
+                                <th>品牌與型號</th>
+                                <th>核心平台</th>
+                                <th>螢幕規格</th>
+                                <th id="prHeader" class="sortable" onclick="sortTable('pr')">規格 PR 值</th>
+                                <th id="ageHeader" class="sortable" onclick="sortTable('age')">該國開賣日期 (已銷售月數)</th>
+                                <th id="priceHeader" class="sortable" onclick="sortTable('price')">市價 (Street Price)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="grid-2">
