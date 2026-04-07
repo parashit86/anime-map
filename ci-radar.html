@@ -99,6 +99,14 @@
         .pr-text { font-size: 14px; font-weight: bold; color: var(--accent-cyan); }
         .asus-highlight .pr-text { color: #fff; }
         .asus-highlight .pr-bar-fill { background: #fff; }
+
+        /* Specifications Modal Link */
+        .spec-link { color: var(--accent-cyan); text-decoration: underline; text-decoration-style: dotted; cursor: pointer; transition: color 0.2s; padding: 4px 8px; border-radius: 4px; display: inline-block; background: rgba(6, 182, 212, 0.1); }
+        .spec-link:hover { color: #fff; background: var(--accent-cyan); }
+        .spec-grid { display: grid; grid-template-columns: 100px 1fr; gap: 10px; font-size: 14px; margin-bottom: 5px; padding: 6px 0; }
+        .spec-grid .spec-label { color: #94a3b8; }
+        .spec-grid .spec-value { color: #f8fafc; font-weight: 500; }
+        .spec-divider { border-bottom: 1px solid #334155; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -146,7 +154,7 @@
                             <tr>
                                 <th>品牌與型號</th>
                                 <th>核心平台</th>
-                                <th>螢幕規格</th>
+                                <th>規格亮點</th>
                                 <th id="prHeader" class="sortable" onclick="sortTable('pr')">規格 PR 值</th>
                                 <th id="ageHeader" class="sortable" onclick="sortTable('age')">該國開賣日期 (已銷售月數)</th>
                                 <th id="priceHeader" class="sortable" onclick="sortTable('price')">市價 (Street Price)</th>
@@ -181,6 +189,22 @@
         </div>
     </div>
 
+    <!-- 規格細節 Modal -->
+    <div id="specModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close" onclick="closeSpecModal()">&times;</span>
+            <h2 style="color: var(--accent-cyan); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                <span id="specModalBrand"></span> <span id="specModalName" style="color: white; font-size: 20px;"></span>
+            </h2>
+            <div style="background: rgba(6, 182, 212, 0.1); border-left: 3px solid var(--accent-cyan); padding: 10px 15px; margin-bottom: 20px; font-size: 14px; color: #bae6fd;">
+                💡 亮點標籤：<span id="specModalHighlight" style="font-weight: bold;"></span>
+            </div>
+            <div id="specModalDetails" style="display: flex; flex-direction: column;">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- 市佔率曲線 Chart Modal -->
     <div id="shareModal" class="modal">
         <div class="modal-content">
@@ -206,35 +230,40 @@
             zenbook: {
                 competitors: [
                     { 
-                      brand: "Apple", name: "MacBook Air 13 (M3)", cpu: "Apple M3", screen: "13.6 inch Liquid Retina", 
+                      brand: "Apple", name: "MacBook Air 13 (M3)", cpu: "Apple M3", highlight: "無風扇極靜設計", 
+                      details: {"處理器": "Apple M3 (8C CPU/10C GPU)", "記憶體": "16GB 統一記憶體", "儲存": "512GB SSD", "螢幕": "13.6 吋 Liquid Retina (60Hz)", "重量": "1.24 kg", "電池": "52.6 Wh"},
                       pr: 80, age_us: 25, age_tw: 24, age_cn: 25,
                       msrp_us: 1499, street_us: 1349, share_us: {q1: 45, q2: 42}, 
                       msrp_tw: 47900, street_tw: 44500, share_tw: {q1: 35, q2: 34},
                       msrp_cn: 10499, street_cn: 9899, share_cn: {q1: 25, q2: 22}, isAsus: false 
                     },
                     { 
-                      brand: "Lenovo", name: "Yoga Slim 7i Aura", cpu: "Intel Lunar Lake", screen: "15.3 inch 2.8K IPS", 
+                      brand: "Lenovo", name: "Yoga Slim 7i Aura", cpu: "Intel Lunar Lake", highlight: "Copilot+ PC 認證", 
+                      details: {"處理器": "Intel Core Ultra 7 258V", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "15.3 吋 2.8K IPS (120Hz)", "重量": "1.46 kg", "電池": "70 Wh"},
                       pr: 88, age_us: 6, age_tw: 5, age_cn: 6,
                       msrp_us: 1299, street_us: 1149, share_us: {q1: 15, q2: 20}, 
                       msrp_tw: 42900, street_tw: 38900, share_tw: {q1: 18, q2: 22},
                       msrp_cn: 7999, street_cn: 7499, share_cn: {q1: 35, q2: 38}, isAsus: false 
                     },
                     { 
-                      brand: "Dell", name: "XPS 13 (9350)", cpu: "Intel Lunar Lake", screen: "13.4 inch 3K OLED", 
+                      brand: "Dell", name: "XPS 13 (9350)", cpu: "Intel Lunar Lake", highlight: "無邊框觸控列", 
+                      details: {"處理器": "Intel Core Ultra 7 258V", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "13.4 吋 3K OLED 觸控", "重量": "1.17 kg", "電池": "55 Wh"},
                       pr: 92, age_us: 5, age_tw: 4, age_cn: 5,
                       msrp_us: 1499, street_us: 1399, share_us: {q1: 16, q2: 15}, 
                       msrp_tw: 58900, street_tw: 55900, share_tw: {q1: 8, q2: 8},
                       msrp_cn: 12999, street_cn: 11999, share_cn: {q1: 10, q2: 9}, isAsus: false 
                     },
                     { 
-                      brand: "Acer", name: "Swift 14 AI", cpu: "Snapdragon X Plus", screen: "14.5 inch 2.5K IPS", 
+                      brand: "Acer", name: "Swift 14 AI", cpu: "Snapdragon X Plus", highlight: "ARM 高效長續航", 
+                      details: {"處理器": "Snapdragon X Plus (10-core)", "記憶體": "16GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "14.5 吋 2.5K IPS (120Hz)", "重量": "1.32 kg", "電池": "75 Wh"},
                       pr: 75, age_us: 8, age_tw: 9, age_cn: 8,
                       msrp_us: 1099, street_us: 899, share_us: {q1: 8, q2: 13}, 
                       msrp_tw: 39900, street_tw: 34900, share_tw: {q1: 15, q2: 18},
                       msrp_cn: 6999, street_cn: 6499, share_cn: {q1: 12, q2: 15}, isAsus: false 
                     },
                     { 
-                      brand: "HP", name: "OmniBook Ultra 14", cpu: "Ryzen AI 9 365", screen: "14 inch 2.2K IPS", 
+                      brand: "HP", name: "OmniBook Ultra 14", cpu: "Ryzen AI 9 365", highlight: "AI 視訊強化", 
+                      details: {"處理器": "AMD Ryzen AI 9 365", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "14 吋 2.2K IPS", "重量": "1.57 kg", "電池": "68 Wh"},
                       pr: 85, age_us: 7, age_tw: 6, age_cn: 7,
                       msrp_us: 1449, street_us: 1349, share_us: {q1: 11, q2: 10}, 
                       msrp_tw: 52900, street_tw: 49900, share_tw: {q1: 6, q2: 5},
@@ -242,7 +271,8 @@
                     }
                 ],
                 targetBase: { 
-                    cpu: "Core Ultra 7 258V", screen: "14 inch 3K 120Hz OLED", 
+                    cpu: "Core Ultra 7 258V", highlight: "高科技陶瓷鋁合金", 
+                    details: {"處理器": "Intel Core Ultra 7 258V", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "14 吋 3K 120Hz Lumina OLED", "重量": "1.20 kg", "電池": "72 Wh"},
                     pr: 95, age_us: 5, age_tw: 6, age_cn: 5,
                     msrp_us: 1399, street_us: 1299, share_us: {q1: 14, q2: 16},
                     msrp_tw: 44900, street_tw: 36999, share_tw: {q1: 16, q2: 20},
@@ -257,35 +287,40 @@
             rog: {
                 competitors: [
                     { 
-                      brand: "Razer", name: "Blade 16", cpu: "Core i9 / RTX 4080", screen: "16 inch Dual Mini-LED", 
+                      brand: "Razer", name: "Blade 16", cpu: "Core i9 / RTX 4080", highlight: "一體成型鋁合金", 
+                      details: {"處理器": "Intel Core i9-14900HX", "顯示卡": "NVIDIA RTX 4080 (175W)", "記憶體": "32GB DDR5-5600", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 Dual-mode Mini-LED (4K 120Hz / FHD 240Hz)", "重量": "2.45 kg"},
                       pr: 92, age_us: 14, age_tw: 13, age_cn: 14,
                       msrp_us: 3299, street_us: 2999, share_us: {q1: 19, q2: 18},
                       msrp_tw: 105000, street_tw: 99000, share_tw: {q1: 10, q2: 9},
                       msrp_cn: 24999, street_cn: 23999, share_cn: {q1: 8, q2: 7}, isAsus: false 
                     },
                     { 
-                      brand: "Lenovo", name: "Legion Pro 7i", cpu: "Core i9 / RTX 4080", screen: "16 inch WQXGA 240Hz", 
+                      brand: "Lenovo", name: "Legion Pro 7i", cpu: "Core i9 / RTX 4080", highlight: "ColdFront 散熱系統", 
+                      details: {"處理器": "Intel Core i9-14900HX", "顯示卡": "NVIDIA RTX 4080 (175W)", "記憶體": "32GB DDR5-5600", "儲存": "2TB PCIe Gen4 SSD", "螢幕": "16 吋 WQXGA IPS (240Hz)", "重量": "2.80 kg"},
                       pr: 88, age_us: 12, age_tw: 11, age_cn: 12,
                       msrp_us: 2799, street_us: 2399, share_us: {q1: 32, q2: 35},
                       msrp_tw: 78900, street_tw: 72900, share_tw: {q1: 25, q2: 28},
                       msrp_cn: 16999, street_cn: 15499, share_cn: {q1: 40, q2: 45}, isAsus: false 
                     },
                     { 
-                      brand: "Alienware", name: "m16 R2", cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch QHD+ 240Hz", 
+                      brand: "Alienware", name: "m16 R2", cpu: "Core Ultra 9 / RTX 4080", highlight: "隱形模式 (Stealth Mode)", 
+                      details: {"處理器": "Intel Core Ultra 9 185H", "顯示卡": "NVIDIA RTX 4080", "記憶體": "32GB DDR5", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 QHD+ (240Hz)", "重量": "2.61 kg"},
                       pr: 90, age_us: 4, age_tw: 3, age_cn: 4,
                       msrp_us: 2699, street_us: 2499, share_us: {q1: 23, q2: 22},
                       msrp_tw: 85000, street_tw: 81900, share_tw: {q1: 15, q2: 14},
                       msrp_cn: 18999, street_cn: 17999, share_cn: {q1: 18, q2: 16}, isAsus: false 
                     },
                     { 
-                      brand: "HP", name: "OMEN Transcend 16", cpu: "Core i9 / RTX 4070", screen: "16 inch 2.5K OLED", 
+                      brand: "HP", name: "OMEN Transcend 16", cpu: "Core i9 / RTX 4070", highlight: "輕薄電競設計", 
+                      details: {"處理器": "Intel Core i9-14900HX", "顯示卡": "NVIDIA RTX 4070 (130W)", "記憶體": "32GB DDR5", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 2.5K OLED (240Hz)", "重量": "2.10 kg"},
                       pr: 82, age_us: 10, age_tw: 9, age_cn: 10,
                       msrp_us: 2199, street_us: 1899, share_us: {q1: 16, q2: 15},
                       msrp_tw: 65000, street_tw: 59900, share_tw: {q1: 20, q2: 18},
                       msrp_cn: 13999, street_cn: 12999, share_cn: {q1: 22, q2: 20}, isAsus: false 
                     },
                     { 
-                      brand: "MSI", name: "Stealth 16", cpu: "Core Ultra 9 / RTX 4070", screen: "16 inch UHD+ OLED", 
+                      brand: "MSI", name: "Stealth 16", cpu: "Core Ultra 9 / RTX 4070", highlight: "鎂鋁合金超輕量", 
+                      details: {"處理器": "Intel Core Ultra 9 185H", "顯示卡": "NVIDIA RTX 4070", "記憶體": "32GB DDR5", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 UHD+ Mini-LED (120Hz)", "重量": "1.99 kg"},
                       pr: 85, age_us: 5, age_tw: 5, age_cn: 4,
                       msrp_us: 2099, street_us: 1999, share_us: {q1: 11, q2: 10},
                       msrp_tw: 68900, street_tw: 64900, share_tw: {q1: 18, q2: 15},
@@ -293,7 +328,8 @@
                     }
                 ],
                 targetBase: { 
-                    cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch 2.5K 240Hz OLED", 
+                    cpu: "Core Ultra 9 / RTX 4080", highlight: "Slash 動態燈效與 CNC 鋁合金", 
+                    details: {"處理器": "Intel Core Ultra 9 185H", "顯示卡": "NVIDIA RTX 4080 (115W)", "記憶體": "32GB LPDDR5x", "儲存": "2TB PCIe Gen4 SSD", "螢幕": "16 吋 2.5K 240Hz Nebula OLED", "重量": "1.85 kg", "散熱": "三風扇 + 液態金屬"},
                     pr: 96, age_us: 4, age_tw: 4, age_cn: 3,
                     msrp_us: 2899, street_us: 2699, share_us: {q1: 23, q2: 25},
                     msrp_tw: 89900, street_tw: 84900, share_tw: {q1: 30, q2: 33},
@@ -409,7 +445,8 @@
                 brand: "👑 ASUS",
                 name: currentModel,
                 cpu: rawData.targetBase.cpu,
-                screen: rawData.targetBase.screen,
+                highlight: rawData.targetBase.highlight,
+                details: rawData.targetBase.details,
                 pr: rawData.targetBase.pr,
                 age_us: rawData.targetBase.age_us,
                 age_tw: rawData.targetBase.age_tw,
@@ -496,7 +533,9 @@
                     <tr class="${rowClass}">
                         <td>${brandStr}</td>
                         <td>${c.cpu}</td>
-                        <td>${c.screen}</td>
+                        <td>
+                            <span class="spec-link" onclick="openSpecModal('${c.brand}', '${c.name}')">${c.highlight}</span>
+                        </td>
                         <td>
                             <div class="pr-text">PR ${c.pr}</div>
                             <div class="pr-bar-bg"><div class="pr-bar-fill" style="width: ${c.pr}%;"></div></div>
@@ -511,6 +550,32 @@
             });
             tbody.innerHTML = html;
         }
+
+        window.openSpecModal = function(brand, name) {
+            const item = currentData.competitors.find(c => c.brand === brand && c.name === name);
+            if (!item) return;
+            
+            document.getElementById('specModalBrand').innerText = brand;
+            document.getElementById('specModalName').innerText = name;
+            document.getElementById('specModalHighlight').innerText = item.highlight;
+            
+            let detailsHtml = '';
+            for (const [key, value] of Object.entries(item.details)) {
+                detailsHtml += `
+                    <div class="spec-grid">
+                        <div class="spec-label">${key}</div>
+                        <div class="spec-value">${value}</div>
+                    </div>
+                    <div class="spec-divider"></div>
+                `;
+            }
+            document.getElementById('specModalDetails').innerHTML = detailsHtml;
+            document.getElementById('specModal').style.display = 'block';
+        };
+
+        window.closeSpecModal = function() {
+            document.getElementById('specModal').style.display = 'none';
+        };
 
         function drawChart() {
             const chartEl = document.getElementById('salesChart');
@@ -795,8 +860,10 @@
         window.onclick = function(event) {
             const modalPrice = document.getElementById('chartModal');
             const modalShare = document.getElementById('shareModal');
+            const modalSpec = document.getElementById('specModal');
             if (event.target == modalPrice) closeChartModal();
             if (event.target == modalShare) closeShareModal();
+            if (event.target == modalSpec) closeSpecModal();
         }
     </script>
 </body>
