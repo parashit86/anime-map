@@ -667,7 +667,7 @@
             const full = Math.floor(rating);
             const half = (rating - full) >= 0.5 ? 1 : 0;
             const empty = 5 - full - half;
-            let starsHtml = '★'.repeat(full) + (half ? '⯨' : '') + '☆'.repeat(empty);
+            let starsHtml = '★'.repeat(full) + (half ? '☆' : '') + '☆'.repeat(empty);
             return `<a href="${url}" target="_blank" style="text-decoration:none; color:#f59e0b; font-size:16px;" title="點擊查看外部市場評價與 Google Reviews">${starsHtml} <span style="font-size:12px; color:#cbd5e1; text-decoration:underline;">(${rating.toFixed(1)})</span></a>`;
         }
 
