@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASUS Global C.I. Radar (全球競爭情報雷達)</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- 加入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-dark: #0f172a; --bg-card: #1e293b; --bg-card-hover: #334155;
@@ -43,20 +45,24 @@
         @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
         
         .card { background: var(--bg-card); border-radius: 12px; padding: 25px; border: 1px solid #334155; overflow-x: auto; }
-        .card h3 { margin-top: 0; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
-        .card h3 .badge { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); padding: 3px 8px; border-radius: 4px; font-size: 11px; }
+        .card h3 { margin-top: 0; color: var(--text-muted); font-size: 15px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+        .card h3 .badge { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s;}
+        .card h3 .badge:hover { background: var(--accent-cyan); color: white; }
         
         table { width: 100%; min-width: 700px; border-collapse: collapse; font-size: 14px; }
         th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #334155; }
         th { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
         
-        th.sortable { cursor: pointer; user-select: none; position: relative; padding-right: 20px;}
+        th.sortable { cursor: pointer; user-select: none; position: relative; padding-right: 20px; transition: color 0.2s;}
+        th.sortable:hover { color: white; }
         th.sortable::after { content: '↕'; position: absolute; right: 5px; color: #64748b; font-size: 12px; }
         th.sortable.asc::after { content: '↑'; color: var(--accent-cyan); }
         th.sortable.desc::after { content: '↓'; color: var(--accent-cyan); }
         
-        .target-row { background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--accent-blue); }
-        .target-row td { font-weight: bold; color: white; }
+        /* ASUS 專屬高光顏色 */
+        .asus-highlight { background-color: rgba(59, 130, 246, 0.15) !important; border-left: 4px solid var(--accent-blue) !important; }
+        .asus-highlight td { font-weight: bold; color: #bae6fd; }
+        
         .price-msrp { font-size: 12px; color: #64748b; text-decoration: line-through; display: block; }
         .price-street { font-size: 15px; color: #f8fafc; font-weight: bold; }
         .danger { color: var(--accent-red); }
@@ -70,20 +76,26 @@
         .ai-card h4 { margin: 0 0 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;}
         .ai-card p { margin: 0; font-size: 13px; color: #cbd5e1; line-height: 1.6; }
 
-        .sales-bar-container { margin-bottom: 15px; padding: 5px; border-radius: 4px; transition: background 0.2s;}
+        .sales-bar-container { margin-bottom: 15px; padding: 5px; border-radius: 4px; transition: background 0.2s; border-left: 4px solid transparent;}
         .sales-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
         .trend-up { color: #10b981; font-size: 11px; margin-left: 5px;}
         .trend-down { color: #ef4444; font-size: 11px; margin-left: 5px;}
         .sales-bar-bg { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
         .sales-bar-fill { height: 100%; background: #475569; border-radius: 4px; transition: width 0.5s ease-out;}
         
-        .asus-highlight { background-color: rgba(59, 130, 246, 0.15) !important; border-left: 4px solid var(--accent-blue); }
+        /* ASUS 在銷量圖表的高光 */
         .sales-bar-container.asus-highlight .sales-header span { color: var(--accent-cyan); font-weight: bold; }
         .sales-bar-container.asus-highlight .sales-bar-fill { background: linear-gradient(90deg, #2563eb, #06b6d4); }
         
         .age-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #334155; color: #cbd5e1; display: inline-block; margin-top: 4px; }
         .age-tag.new { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
         .age-tag.old { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content { background-color: var(--bg-card); margin: 5% auto; padding: 25px; border: 1px solid #475569; width: 90%; max-width: 900px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative;}
+        .close { color: #94a3b8; position: absolute; right: 20px; top: 15px; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s;}
+        .close:hover { color: white; }
     </style>
 </head>
 <body>
@@ -98,7 +110,7 @@
     <div class="container">
         <div class="search-box">
             <h2>全方位競品報價與區域銷量分析</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">選擇目標國家並輸入華碩機型，即時攝取該區市價、產品週期 (Life Cycle) 與銷量佔比。</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">選擇目標國家並輸入華碩機型，即時攝取該區市價、產品週期與銷量佔比。</p>
             <div class="input-group">
                 <select id="countrySelect" class="country-select">
                     <option value="us">🇺🇸 北美市場 (USD)</option>
@@ -108,7 +120,6 @@
                 <input type="text" id="modelInput" placeholder="e.g. Zenbook S 14 UX3407" value="Zenbook S 14 UX3407">
                 <button class="action-btn" onclick="startAnalysis()">📡 Start Analysis</button>
             </div>
-            <div style="margin-top: 15px; font-size: 12px; color: #64748b;">*動態支援國家切換，表格支援價格與產品週期 (上市多久) 之排序</div>
         </div>
 
         <div class="loader" id="loader">
@@ -122,14 +133,18 @@
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
-                <h3>⚙️ 同級距硬體規格、產品週期與市價對標 <span class="badge">Sortable Live Data</span></h3>
+                <h3>
+                    <span>⚙️ 同級距硬體規格、產品週期與市價對標</span>
+                    <!-- 加入一年內價格曲線的按鈕 Icon -->
+                    <span class="badge" onclick="openChartModal()" title="查看一年內市價波動曲線">📈 點此查看 1Y 價格波動曲線</span>
+                </h3>
                 <table id="specsTable">
                     <thead>
                         <tr>
                             <th>品牌與型號</th>
                             <th>核心平台</th>
                             <th>螢幕規格</th>
-                            <th id="ageHeader" class="sortable" onclick="sortTable('age')">該國開賣日期 (已銷售月數)</th>
+                            <th id="ageHeader" class="sortable" onclick="sortTable('age')">開賣年月 (已銷售月數)</th>
                             <th id="priceHeader" class="sortable" onclick="sortTable('price')">市價 (Street Price)</th>
                         </tr>
                     </thead>
@@ -141,20 +156,30 @@
 
             <div class="grid-2">
                 <div class="card">
-                    <h3>📈 <span id="chartTitleMarket">台灣市場</span> 銷量佔比與季成長預估 (同級距競品) <span class="badge">Q1 vs Q2</span></h3>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-top:-15px; margin-bottom: 15px;">*針對您輸入的型號級距，對比上一季市佔率變化 (由高至低排序)</p>
+                    <h3>📈 <span id="chartTitleMarket">台灣市場</span> 銷量佔比預估 (同級距) <span class="badge" style="cursor:default">Q1 vs Q2</span></h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top:-15px; margin-bottom: 15px;">*市佔率由高到低自動排序，華碩標示藍底</p>
                     <div id="salesChart">
                         <!-- Injected by JS -->
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3>🤖 Multi-LLM 戰略行動建議 (Strategic Actions) <span class="badge">Cross-Validated</span></h3>
+                    <h3>🤖 Multi-LLM 戰略行動建議 <span class="badge" style="cursor:default">Cross-Validated</span></h3>
                     <div class="ai-advice" id="aiAdvice">
                         <!-- Injected by JS -->
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 價格曲線 Chart Modal -->
+    <div id="chartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeChartModal()">&times;</span>
+            <h2 style="color: var(--accent-cyan); margin-top: 0;">📉 過去一年市價波動趨勢 (Price Trend)</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">*圖表呈現從 MSRP 牌價至當前 Street Price 的歷史降價軌跡 (依上市時間遞減)。</p>
+            <canvas id="priceChartCanvas" style="max-height: 400px;"></canvas>
         </div>
     </div>
 
@@ -257,9 +282,9 @@
                     msrp_cn: 19999, street_cn: 18999, share_cn: {q1: 20, q2: 22} 
                 },
                 advice: [
-                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "Alienware m16 R2 剛發布 (上市3個月)，具備強大的媒體新鮮度。ROG 必須在新品上市期內，強調「CNC 鋁合金一體成型工藝」拉開與競品的散熱差距。" },
-                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "緊咬 Razer Blade 16 進行定價對標。Razer 已上市13個月面臨生命週期衰退，此時我們提供同級的 OLED 面板與更安靜的散熱系統，可直接搶奪其準備換機的創作者客群。" },
-                    { ai: "xAI Grok", color: "grok", icon: "🟠", text: "北美市場對於『Slash Lighting』反應熱烈。建議在 Twitch 贊助實況主，讓他們在直播背景展示自訂的 ROG 燈效。" }
+                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "Alienware m16 R2 剛發布，具備強大的媒體新鮮度。ROG 必須在新品上市期內，強調「CNC 鋁合金一體成型工藝」拉開與競品的差距。" },
+                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "緊咬 Razer Blade 16 進行定價對標。Razer 已上市13個月面臨衰退，此時我們提供同級的 OLED 面板與更安靜的散熱系統，可直接搶奪其客群。" },
+                    { ai: "xAI Grok", color: "grok", icon: "🟠", text: "北美市場對於『Slash Lighting』反應熱烈。建議在 Twitch 贊助實況主，強化潮牌電競信仰。" }
                 ]
             }
         };
@@ -274,12 +299,12 @@
             "Compiling final Regional Executive Dashboard..."
         ];
 
-        let currentData = null; // Will hold unified list including ASUS
+        let currentData = null;
         let currentModel = "";
         let currentCountry = "tw";
         
         let sortCol = "price";
-        let sortAsc = true; 
+        let sortAsc = false; // true = ascending (low->high), false = descending (high->low)
 
         window.startAnalysis = async function() {
             const input = document.getElementById('modelInput').value.trim();
@@ -309,11 +334,9 @@
                 document.getElementById('targetMarketName').innerText = selectEl.options[selectEl.selectedIndex].text.split(' ')[1];
                 document.getElementById('chartTitleMarket').innerText = selectEl.options[selectEl.selectedIndex].text.split(' ')[1];
                 
-                // Keep the current sort column and direction when changing country
-                // but we need to re-trigger the sort logic to apply it to the new country's data
-                sortAsc = !sortAsc; // flip it so sortTable flips it back to original
+                // Re-trigger sort with current state to resort new country prices
+                sortAsc = !sortAsc; 
                 sortTable(sortCol);
-                
                 drawChart(); 
             }
         });
@@ -327,7 +350,6 @@
         }
         
         function formatAge(months) {
-            // Base Date: April 2026 (2026/04)
             let year = 2026;
             let month = 4 - months;
             while (month <= 0) {
@@ -361,13 +383,11 @@
             
             let rawData = archetypes[type];
             
-            // Unify ASUS target product into the competitors list for unified sorting
             currentData = {
                 advice: rawData.advice,
                 competitors: JSON.parse(JSON.stringify(rawData.competitors))
             };
             
-            // Add target to the unified list
             currentData.competitors.push({
                 brand: "👑 ASUS",
                 name: currentModel,
@@ -391,9 +411,9 @@
             document.getElementById('priceHeader').classList.remove('asc', 'desc');
             document.getElementById('ageHeader').classList.remove('asc', 'desc');
             
-            // Default sort by price: High to Low (Descending)
+            // PRE-SORT FIX: Force sorting by price, descending
             sortCol = "price";
-            sortAsc = true; // sortTable will flip this to false (Descending)
+            sortAsc = true; // when sortTable is called, it flips to false (descending)
             sortTable('price');
             
             drawChart();
@@ -405,7 +425,7 @@
                 sortAsc = !sortAsc;
             } else {
                 sortCol = column;
-                sortAsc = true;
+                sortAsc = true; // default to asc on new column, but 'price' initial is handled above
             }
             
             document.getElementById('priceHeader').classList.remove('asc', 'desc');
@@ -434,7 +454,6 @@
         function drawTable() {
             const tbody = document.querySelector('#specsTable tbody');
             
-            // Find ASUS price to determine threat
             const asusDevice = currentData.competitors.find(c => c.isAsus);
             const targetSPrice = asusDevice ? asusDevice['street_' + currentCountry] : 0;
             
@@ -445,7 +464,6 @@
                 const mPrice = c['msrp_' + currentCountry];
                 const age = c['age_' + currentCountry];
                 
-                // Highlight danger if competitor is more than 10% cheaper than target
                 const threatClass = (!c.isAsus && sPrice < targetSPrice * 0.9) ? 'danger' : ''; 
                 const rowClass = c.isAsus ? 'asus-highlight target-row' : '';
                 const brandStr = c.isAsus ? `<strong>${c.brand} ${c.name}</strong>` : `${c.brand} ${c.name}`;
@@ -472,7 +490,7 @@
             
             let allBrands = [...currentData.competitors];
             
-            // Sort by current country's Q2 share descending
+            // Sort by current country's Q2 share descending!
             allBrands.sort((a, b) => b['share_'+currentCountry].q2 - a['share_'+currentCountry].q2);
             
             allBrands.forEach(c => {
@@ -516,6 +534,121 @@
                 `;
             });
             adviceEl.innerHTML = adviceHtml;
+        }
+
+        /* ----------------------------------------------------
+           NEW FEATURE: PRICE HISTORY CHART MODAL 
+           ---------------------------------------------------- */
+        let priceChartInstance = null;
+
+        function generatePriceHistory(streetPrice, msrpPrice, ageMonths) {
+            // Generate a 12-month mock history (0 = 11 months ago, 11 = current month)
+            let history = [];
+            for (let i = 0; i < 12; i++) {
+                let monthsAgo = 11 - i;
+                if (monthsAgo > ageMonths) {
+                    history.push(null); // Not released yet
+                } else if (monthsAgo === ageMonths) {
+                    history.push(msrpPrice); // Release month = MSRP
+                } else {
+                    // Linear drop from MSRP to Street Price
+                    let progress = 1 - (monthsAgo / Math.max(1, ageMonths));
+                    let current = msrpPrice - ((msrpPrice - streetPrice) * progress);
+                    history.push(Math.round(current));
+                }
+            }
+            return history;
+        }
+
+        window.openChartModal = function() {
+            if (!currentData || !currentData.competitors) return;
+            
+            const modal = document.getElementById('chartModal');
+            modal.style.display = 'block';
+            
+            const ctx = document.getElementById('priceChartCanvas').getContext('2d');
+            if (priceChartInstance) {
+                priceChartInstance.destroy();
+            }
+
+            // Generate X-axis labels (Last 12 months)
+            const labels = [];
+            const today = new Date(2026, 3, 1); // Mock today as April 2026
+            for (let i = 11; i >= 0; i--) {
+                let d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                labels.push(`${d.getFullYear()}/${(d.getMonth() + 1).toString().padStart(2, '0')}`);
+            }
+
+            const datasets = [];
+            const colors = ['#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'];
+            let colorIdx = 0;
+
+            currentData.competitors.forEach((c) => {
+                const sPrice = c['street_' + currentCountry];
+                const mPrice = c['msrp_' + currentCountry];
+                const age = c['age_' + currentCountry];
+                
+                const history = generatePriceHistory(sPrice, mPrice, age);
+                
+                datasets.push({
+                    label: c.isAsus ? "👑 " + c.brand : c.brand,
+                    data: history,
+                    borderColor: c.isAsus ? '#06b6d4' : colors[colorIdx++ % colors.length],
+                    backgroundColor: 'transparent',
+                    borderWidth: c.isAsus ? 4 : 2,
+                    borderDash: c.isAsus ? [] : [5, 5], // Competitors have dashed lines
+                    tension: 0.2,
+                    spanGaps: true
+                });
+            });
+
+            priceChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc', font: { family: 'Noto Sans TC' } } },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += formatPrice(context.parsed.y, currentCountry);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        y: { 
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: function(value) { return formatPrice(value, currentCountry); }
+                            }, 
+                            grid: { color: '#334155' } 
+                        }
+                    }
+                }
+            });
+        };
+
+        window.closeChartModal = function() {
+            document.getElementById('chartModal').style.display = 'none';
+        };
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('chartModal');
+            if (event.target == modal) {
+                closeChartModal();
+            }
         }
     </script>
 </body>
