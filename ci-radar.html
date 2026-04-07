@@ -164,6 +164,7 @@
             <div class="card" style="margin-bottom: 20px;">
                 <h3>
                     <span>⚙️ 同級距硬體規格、庫存狀態與市價對標</span>
+                    <span class="badge" onclick="openSourceModal('specs')" title="查看硬體與市價報價資料來源">ℹ️ Data Source</span>
                     <span class="badge" onclick="openChartModal()" title="查看一年內市價波動曲線">📈 點此查看 1Y 價格波動曲線</span>
                 </h3>
                 <div style="overflow-x: auto;">
@@ -190,6 +191,7 @@
                 <div class="card">
                     <h3>
                         <span>📈 <span id="chartTitleMarket">台灣市場</span> 銷量佔比預估 (同級距)</span>
+                        <span class="badge" onclick="openSourceModal('sales')" title="查看區域銷量與市佔預估來源">ℹ️ Data Source</span>
                         <span class="badge" onclick="openShareModal()" title="查看一年內市佔率波動曲線">📊 點此查看 1Y 市佔率趨勢</span>
                     </h3>
                     <p style="font-size: 11px; color: var(--text-muted); margin-top:-15px; margin-bottom: 15px;">*市佔率由高到低自動排序，華碩標示藍底</p>
@@ -199,11 +201,25 @@
                 </div>
 
                 <div class="card">
-                    <h3>🤖 商業競爭力洞察與行動建議 <span class="badge" style="cursor:default">AI Cross-Validated</span></h3>
+                    <h3><span>🤖 商業競爭力洞察與行動建議</span> <div style="display:flex; gap:10px;"><span class="badge" onclick="openSourceModal('ai')" title="查看跨模型 AI 分析資料來源">ℹ️ Data Source</span> <span class="badge" style="cursor:default">AI Cross-Validated</span></div></h3>
                     <div class="ai-advice" id="aiAdvice">
                         <!-- Injected by JS -->
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- 資料來源 Modal -->
+    <div id="sourceModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close" onclick="closeSourceModal()">&times;</span>
+            <h2 style="color: var(--accent-cyan); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                ℹ️ <span id="sourceModalTitle" style="color: white; font-size: 20px;">資料來源</span>
+            </h2>
+            <div id="sourceModalContent" style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">
+                <!-- Injected by JS -->
             </div>
         </div>
     </div>
@@ -671,6 +687,52 @@
             return `<a href="${url}" target="_blank" style="text-decoration:none; color:#f59e0b; font-size:16px;" title="點擊查看外部市場評價與 Google Reviews">${starsHtml} <span style="font-size:12px; color:#cbd5e1; text-decoration:underline;">(${rating.toFixed(1)})</span></a>`;
         }
 
+        
+        const sourceData = {
+            'specs': {
+                title: '硬體規格與市價報價來源',
+                content: `
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li style="margin-bottom: 10px;"><strong>官方型錄與MSRP：</strong><br><a href="https://store.asus.com" target="_blank" style="color:var(--accent-cyan);">ASUS Official Store Crawler</a></li>
+                        <li style="margin-bottom: 10px;"><strong>北美終端市價：</strong><br><a href="https://www.bestbuy.com" target="_blank" style="color:var(--accent-cyan);">BestBuy API</a> / <a href="https://www.amazon.com" target="_blank" style="color:var(--accent-cyan);">Amazon US</a></li>
+                        <li style="margin-bottom: 10px;"><strong>台灣終端市價：</strong><br><a href="https://24h.pchome.com.tw" target="_blank" style="color:var(--accent-cyan);">PChome 24h</a> / <a href="https://www.momo.com.tw" target="_blank" style="color:var(--accent-cyan);">MOMO 購物網</a></li>
+                        <li style="margin-bottom: 10px;"><strong>中國終端市價：</strong><br><a href="https://www.jd.com" target="_blank" style="color:var(--accent-cyan);">JD.com (京東)</a></li>
+                        <li style="margin-bottom: 10px;"><strong>更新頻率：</strong>每日 08:00 (UTC+8) 自動擷取</li>
+                    </ul>`
+            },
+            'sales': {
+                title: '區域銷量佔比來源',
+                content: `
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li style="margin-bottom: 10px;"><strong>零售追蹤預估 (Retail Tracking)：</strong><br>經由 <a href="https://www.gfk.com" target="_blank" style="color:var(--accent-cyan);">GfK Data Services</a> 與 <a href="https://www.npd.com" target="_blank" style="color:var(--accent-cyan);">NPD Group</a> 聚合預估模型</li>
+                        <li style="margin-bottom: 10px;"><strong>市場版圖趨勢：</strong><br><a href="https://www.idc.com" target="_blank" style="color:var(--accent-cyan);">IDC Quarterly Personal Computing Device Tracker</a></li>
+                        <li style="margin-bottom: 10px;"><strong>更新頻率：</strong>每季度 (Quarterly) / 滾動式月推估</li>
+                    </ul>`
+            },
+            'ai': {
+                title: 'AI 戰略洞察來源',
+                content: `
+                    <ul style="padding-left: 20px; margin-top: 10px;">
+                        <li style="margin-bottom: 10px;"><strong>BU Head 戰略：</strong><br><a href="https://openai.com/chatgpt" target="_blank" style="color:var(--accent-cyan);">OpenAI GPT-4o API</a></li>
+                        <li style="margin-bottom: 10px;"><strong>COO 營運洞察：</strong><br><a href="https://gemini.google.com" target="_blank" style="color:var(--accent-cyan);">Google Gemini 1.5 Pro API</a></li>
+                        <li style="margin-bottom: 10px;"><strong>Sales 定價策略：</strong><br><a href="https://x.ai" target="_blank" style="color:var(--accent-cyan);">xAI Grok 2 API</a></li>
+                        <li style="margin-bottom: 10px;"><strong>更新頻率：</strong>即時 (Real-time Prompt Injection)</li>
+                    </ul>`
+            }
+        };
+
+        window.openSourceModal = function(type) {
+            const data = sourceData[type];
+            if (!data) return;
+            document.getElementById('sourceModalTitle').innerText = data.title;
+            document.getElementById('sourceModalContent').innerHTML = data.content;
+            document.getElementById('sourceModal').style.display = 'block';
+        };
+
+        window.closeSourceModal = function() {
+            document.getElementById('sourceModal').style.display = 'none';
+        };
+
         window.openSpecModal = function(brand, name) {
             const item = currentData.competitors.find(c => c.brand === brand && c.name === name);
             if (!item) return;
@@ -997,6 +1059,8 @@
             if (event.target == modalPrice) closeChartModal();
             if (event.target == modalShare) closeShareModal();
             if (event.target == modalSpec) closeSpecModal();
+            const modalSource = document.getElementById('sourceModal');
+            if (event.target == modalSource) closeSourceModal();
         }
     </script>
 </body>
