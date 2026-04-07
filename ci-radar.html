@@ -603,9 +603,49 @@
             tbody.innerHTML = html;
         }
 
+        function compareSpec(key, compVal, asusVal) {
+            if (!asusVal) return '';
+            let cStr = String(compVal).toUpperCase();
+            let aStr = String(asusVal).toUpperCase();
+            const getNum = (s) => { const m = s.match(/[\d.]+/); return m ? parseFloat(m[0]) : null; };
+            const blue = 'color: #60a5fa; font-weight: bold; text-shadow: 0 0 8px rgba(96,165,250,0.4);';
+            const red = 'color: #ef4444;';
+
+            if (key === '重量') {
+                let c = getNum(cStr), a = getNum(aStr);
+                if (c !== null && a !== null && c !== a) return c < a ? blue : red;
+            } else if (key === '電池') {
+                let c = getNum(cStr), a = getNum(aStr);
+                if (c !== null && a !== null && c !== a) return c > a ? blue : red;
+            } else if (key === '記憶體') {
+                let c = getNum(cStr), a = getNum(aStr);
+                if (c !== null && a !== null && c !== a) return c > a ? blue : red;
+            } else if (key === '儲存') {
+                let c = getNum(cStr), a = getNum(aStr);
+                if (cStr.includes('TB')) c *= 1024;
+                if (aStr.includes('TB')) a *= 1024;
+                if (c !== null && a !== null && c !== a) return c > a ? blue : red;
+            } else if (key === '螢幕') {
+                let cHzM = cStr.match(/(\d+)HZ/); let aHzM = aStr.match(/(\d+)HZ/);
+                let cHz = cHzM ? parseInt(cHzM[1]) : 60; let aHz = aHzM ? parseInt(aHzM[1]) : 60;
+                if (cHz !== aHz) return cHz > aHz ? blue : red;
+                let cKM = cStr.match(/([\d.]+)K/); let aKM = aStr.match(/([\d.]+)K/);
+                let cK = cKM ? parseFloat(cKM[1]) : 0; let aK = aKM ? parseFloat(aKM[1]) : 0;
+                if (cK !== aK) return cK > aK ? blue : red;
+                if (cStr.includes('OLED') && !aStr.includes('OLED')) return blue;
+                if (!cStr.includes('OLED') && aStr.includes('OLED')) return red;
+            } else if (key === '處理器') {
+                if ((aStr.includes('ULTRA 7') || aStr.includes('ULTRA 9')) && (cStr.includes('M3') || cStr.includes('X PLUS'))) return red;
+            }
+            return '';
+        }
+
         window.openSpecModal = function(brand, name) {
             const item = currentData.competitors.find(c => c.brand === brand && c.name === name);
             if (!item) return;
+            
+            const asusItem = currentData.competitors.find(c => c.isAsus);
+            const asusDetails = asusItem ? asusItem.details : {};
             
             document.getElementById('specModalBrand').innerText = brand;
             document.getElementById('specModalName').innerText = name;
@@ -613,14 +653,24 @@
             
             let detailsHtml = '';
             for (const [key, value] of Object.entries(item.details)) {
+                let colorStyle = '';
+                if (!item.isAsus && asusDetails[key]) {
+                    colorStyle = compareSpec(key, value, asusDetails[key]);
+                }
+                
                 detailsHtml += `
                     <div class="spec-grid">
                         <div class="spec-label">${key}</div>
-                        <div class="spec-value">${value}</div>
+                        <div class="spec-value" style="${colorStyle}">${value}</div>
                     </div>
                     <div class="spec-divider"></div>
                 `;
             }
+            
+            if (!item.isAsus) {
+                detailsHtml += `<div style="margin-top:15px; font-size:12px; color:#64748b; text-align:right;">* 藍字表示規格優於華碩，紅字表示劣於華碩</div>`;
+            }
+
             document.getElementById('specModalDetails').innerHTML = detailsHtml;
             document.getElementById('specModal').style.display = 'block';
         };
