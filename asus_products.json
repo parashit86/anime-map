@@ -1,0 +1,42 @@
+[
+  {
+    "model": "Zenbook S 14 UX3407",
+    "series": "Zenbook",
+    "url": "https://www.asus.com/tw/laptops/for-home/zenbook/"
+  },
+  {
+    "model": "Zenbook 14 OLED UX3405",
+    "series": "Zenbook",
+    "url": "https://www.asus.com/tw/laptops/for-home/zenbook/"
+  },
+  {
+    "model": "ROG Zephyrus G16 GU605",
+    "series": "ROG",
+    "url": "https://rog.asus.com/tw/laptops/"
+  },
+  {
+    "model": "ROG Strix SCAR 18 G834",
+    "series": "ROG",
+    "url": "https://rog.asus.com/tw/laptops/"
+  },
+  {
+    "model": "ProArt P16 H7606",
+    "series": "ProArt",
+    "url": "https://www.asus.com/tw/laptops/for-creators/proart/"
+  },
+  {
+    "model": "Vivobook S 15 OLED S5507",
+    "series": "Vivobook",
+    "url": "https://www.asus.com/tw/laptops/for-home/vivobook/"
+  },
+  {
+    "model": "TUF Gaming A15 FA507",
+    "series": "TUF",
+    "url": "https://www.asus.com/tw/laptops/for-gaming/tuf-gaming/"
+  },
+  {
+    "model": "ExpertBook B9 OLED B9403",
+    "series": "ExpertBook",
+    "url": "https://www.asus.com/tw/laptops/for-work/expertbook/"
+  }
+]
