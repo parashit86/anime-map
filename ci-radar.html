@@ -667,19 +667,47 @@
         };
 
         function generatePriceHistory(streetPrice, msrpPrice, ageMonths) {
-            // Generate a 12-month mock history (0 = 11 months ago, 11 = current month)
             let history = [];
+            
+            // Random seed generator based on prices so it's consistent for the same product
+            let seed = streetPrice + msrpPrice + ageMonths;
+            function random() {
+                let x = Math.sin(seed++) * 10000;
+                return x - Math.floor(x);
+            }
+
             for (let i = 0; i < 12; i++) {
                 let monthsAgo = 11 - i;
+                
                 if (monthsAgo > ageMonths) {
-                    history.push(null); // Not released yet
+                    history.push(null); // Not released
                 } else if (monthsAgo === ageMonths) {
                     history.push(msrpPrice); // Release month = MSRP
+                } else if (monthsAgo === 0) {
+                    history.push(streetPrice); // Current month = Exact Street Price
                 } else {
-                    // Linear drop from MSRP to Street Price
-                    let progress = 1 - (monthsAgo / Math.max(1, ageMonths));
-                    let current = msrpPrice - ((msrpPrice - streetPrice) * progress);
-                    history.push(Math.round(current));
+                    // Calculate a base linear drop
+                    let progress = 1 - (monthsAgo / ageMonths);
+                    let basePrice = msrpPrice - ((msrpPrice - streetPrice) * progress);
+                    
+                    // Add volatility (jaggedness)
+                    // High volatility for older products, lower for newer
+                    let volatilityMax = (msrpPrice - streetPrice) * 0.4; 
+                    
+                    // Simulate promotional dips (e.g. Black Friday, Back to School)
+                    let isPromoMonth = (i === 10 || i === 7 || i === 4); // Random promotional months
+                    let promoDrop = isPromoMonth ? volatilityMax * 0.8 : 0;
+                    
+                    let noise = (random() - 0.3) * volatilityMax; // Skewed slightly towards drops
+                    
+                    let current = basePrice + noise - promoDrop;
+                    
+                    // Don't let it go higher than MSRP or lower than final street price by too much
+                    if (current > msrpPrice) current = msrpPrice;
+                    if (current < streetPrice * 0.85) current = streetPrice * 0.85;
+                    
+                    // Round to neat numbers (e.g., end in 9 or 0)
+                    history.push(Math.floor(current / 10) * 10 + 9);
                 }
             }
             return history;
