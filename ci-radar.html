@@ -18,33 +18,43 @@
         
         .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
         
-        /* Search Section */
         .search-box { background: var(--bg-card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #334155; margin-bottom: 40px; }
         .search-box h2 { margin-top: 0; font-size: 24px; font-weight: 500; }
-        .input-group { display: flex; flex-direction: column; gap: 15px; max-width: 700px; margin: 0 auto; }
-@media (min-width: 600px) { .input-group { flex-direction: row; } }
+        
+        .input-group { display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; }
+        @media (min-width: 700px) { .input-group { flex-direction: row; align-items: center; } }
+        
+        select.country-select { padding: 15px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; outline: none; cursor: pointer; flex-shrink: 0; }
+        select.country-select:focus { border-color: var(--accent-cyan); }
+        
         input[type="text"] { flex: 1; padding: 15px 20px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; font-family: 'JetBrains Mono', monospace; outline: none; transition: border-color 0.3s;}
         input[type="text"]:focus { border-color: var(--accent-cyan); }
-        button { padding: 15px 30px; border-radius: 8px; border: none; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; }
-        button:hover { opacity: 0.9; }
+        
+        button.action-btn { padding: 15px 30px; border-radius: 8px; border: none; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: opacity 0.3s; white-space: nowrap; }
+        button.action-btn:hover { opacity: 0.9; }
 
-        /* Loader */
         .loader { display: none; text-align: center; margin: 40px 0; }
         .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--accent-cyan); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         .log-text { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent-cyan); min-height: 20px;}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Dashboard Results */
         #dashboard { display: none; }
         .grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 20px; }
-@media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-        .card { background: var(--bg-card); border-radius: 12px; padding: 25px; border: 1px solid #334155; }
+        @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+        
+        .card { background: var(--bg-card); border-radius: 12px; padding: 25px; border: 1px solid #334155; overflow-x: auto; }
         .card h3 { margin-top: 0; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
         .card h3 .badge { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); padding: 3px 8px; border-radius: 4px; font-size: 11px; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 14px; }
         th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #334155; }
         th { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+        
+        th.sortable { cursor: pointer; user-select: none; position: relative; padding-right: 20px;}
+        th.sortable::after { content: '↕'; position: absolute; right: 5px; color: #64748b; font-size: 12px; }
+        th.sortable.asc::after { content: '↑'; color: var(--accent-cyan); }
+        th.sortable.desc::after { content: '↓'; color: var(--accent-cyan); }
+        
         .target-row { background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--accent-blue); }
         .target-row td { font-weight: bold; color: white; }
         .price-msrp { font-size: 12px; color: #64748b; text-decoration: line-through; display: block; }
@@ -60,19 +70,15 @@
         .ai-card h4 { margin: 0 0 8px 0; font-size: 14px; display: flex; align-items: center; gap: 8px;}
         .ai-card p { margin: 0; font-size: 13px; color: #cbd5e1; line-height: 1.6; }
 
-        .sales-bar-container { margin-bottom: 15px; }
+        .sales-bar-container { margin-bottom: 15px; padding: 5px; border-radius: 4px; transition: background 0.2s;}
         .sales-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
         .sales-bar-bg { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
-        .sales-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); border-radius: 4px; }
-    
-        th.sortable { cursor: pointer; user-select: none; position: relative; padding-right: 20px;}
-        th.sortable::after { content: '↕'; position: absolute; right: 5px; color: #64748b; font-size: 12px; }
-        th.sortable.asc::after { content: '↑'; color: var(--accent-cyan); }
-        th.sortable.desc::after { content: '↓'; color: var(--accent-cyan); }
-        .asus-highlight { background-color: rgba(59, 130, 246, 0.2) !important; border-left: 4px solid var(--accent-blue); }
+        .sales-bar-fill { height: 100%; background: #475569; border-radius: 4px; transition: width 0.5s ease-out;}
+        
+        .asus-highlight { background-color: rgba(59, 130, 246, 0.15) !important; border-left: 4px solid var(--accent-blue); }
         .sales-bar-container.asus-highlight .sales-header span { color: var(--accent-cyan); font-weight: bold; }
         .sales-bar-container.asus-highlight .sales-bar-fill { background: linear-gradient(90deg, #2563eb, #06b6d4); }
-</style>
+    </style>
 </head>
 <body>
     <div class="navbar">
@@ -80,18 +86,23 @@
             <div class="logo-icon">C.I.</div>
             ASUS Global Market Intelligence Radar
         </div>
-        <div style="font-size: 12px; color: var(--text-muted);">Powered by OpenClaw Engine</div>
+        <div style="font-size: 12px; color: var(--text-muted);">Powered by OpenClaw</div>
     </div>
 
     <div class="container">
         <div class="search-box">
-            <h2>輸入欲分析之華碩機型 (Target Product Model)</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">系統將即時攝取全球六大品牌 (Apple, Lenovo, HP, Dell, Acer, MSI) 之對標競品、市價與銷量數據。</p>
+            <h2>全方位競品報價與銷量分析</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">選擇目標國家並輸入華碩機型，即時攝取市價、銷量並產出決策建議。</p>
             <div class="input-group">
-                <input type="text" id="modelInput" placeholder="e.g. Zenbook S 14 UX3407, ROG Zephyrus G16, Vivobook 15..." value="Zenbook S 14 UX3407">
-                <button onclick="startAnalysis()">📡 Start Analysis</button>
+                <select id="countrySelect" class="country-select">
+                    <option value="us">🇺🇸 北美市場 (USD)</option>
+                    <option value="tw" selected>🇹🇼 台灣市場 (TWD)</option>
+                    <option value="cn">🇨🇳 中國市場 (CNY)</option>
+                </select>
+                <input type="text" id="modelInput" placeholder="e.g. Zenbook S 14 UX3407" value="Zenbook S 14 UX3407">
+                <button class="action-btn" onclick="startAnalysis()">📡 Start Analysis</button>
             </div>
-            <div style="margin-top: 15px; font-size: 12px; color: #64748b;">*範例支援: Zenbook S 14, ROG Zephyrus G16, ExpertBook B9</div>
+            <div style="margin-top: 15px; font-size: 12px; color: #64748b;">*動態支援國家切換，表格自動篩選並支援價格點擊排序</div>
         </div>
 
         <div class="loader" id="loader">
@@ -101,33 +112,29 @@
 
         <div id="dashboard">
             <div style="margin-bottom: 20px; font-size: 20px; font-weight: bold; border-left: 4px solid var(--accent-cyan); padding-left: 15px;">
-                分析目標：<span id="targetModelName" style="color: var(--accent-cyan);"></span>
+                分析目標：<span id="targetModelName" style="color: var(--accent-cyan);"></span> | 市場：<span id="targetMarketName" style="color: #fff;"></span>
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
-                <h3>⚙️ 核心硬體規格與定價矩陣 (MSRP vs Street Price) <span class="badge">Live Data</span></h3>
-                <div style="overflow-x: auto;">
-                    <table id="specsTable">
-                        <thead>
-                            <tr>
-                                <th>品牌與型號</th>
-                                <th>核心平台</th>
-                                <th>螢幕規格</th>
-                                <th class="sortable" onclick="sortTable('us')">US 北美市價</th>
-                                <th class="sortable" onclick="sortTable('tw')">TW 台灣市價</th>
-                                <th class="sortable" onclick="sortTable('cn')">CN 中國市價</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
+                <h3>⚙️ 核心硬體規格與單一國家市價對標 <span class="badge">Sortable Live Data</span></h3>
+                <table id="specsTable">
+                    <thead>
+                        <tr>
+                            <th>品牌與型號</th>
+                            <th>核心平台</th>
+                            <th>螢幕規格</th>
+                            <th id="priceHeader" class="sortable" onclick="sortTable()">市價 (Street Price)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Injected by JS -->
+                    </tbody>
+                </table>
             </div>
 
             <div class="grid-2">
                 <div class="card">
-                    <h3>📈 全球市場銷量佔比預估 (同級距產品) <span class="badge">2026 Q2</span></h3>
+                    <h3>📈 全球市場銷量佔比預估 (同級距) <span class="badge">Sorted by Share</span></h3>
                     <div id="salesChart">
                         <!-- Injected by JS -->
                     </div>
@@ -144,35 +151,34 @@
     </div>
 
     <script>
-        // Database of archetypes to simulate real-time API responses for demonstration
         const archetypes = {
             zenbook: {
                 competitors: [
-                    { brand: "Apple", name: "MacBook Air 13 (M3)", cpu: "Apple M3 (18 TOPS)", screen: "13.6 inch Liquid Retina", msrp_us: 1499, street_us: 1349, street_tw: "NT$44,500", street_cn: "¥9,899", share: 42 },
-                    { brand: "Lenovo", name: "Yoga Slim 7i Aura", cpu: "Intel Lunar Lake (48 TOPS)", screen: "15.3 inch 2.8K IPS", msrp_us: 1299, street_us: 1149, street_tw: "NT$38,900", street_cn: "¥7,999", share: 20 },
-                    { brand: "Dell", name: "XPS 13 (9350)", cpu: "Intel Lunar Lake (48 TOPS)", screen: "13.4 inch 3K OLED", msrp_us: 1499, street_us: 1399, street_tw: "NT$55,900", street_cn: "¥11,999", share: 15 },
-                    { brand: "Acer", name: "Swift 14 AI", cpu: "Snapdragon X Plus", screen: "14.5 inch 2.5K IPS", msrp_us: 1099, street_us: 899, street_tw: "NT$34,900", street_cn: "¥6,499", share: 13 },
-                    { brand: "HP", name: "OmniBook Ultra 14", cpu: "Ryzen AI 9 365", screen: "14 inch 2.2K IPS", msrp_us: 1449, street_us: 1349, street_tw: "NT$49,900", street_cn: "¥9,299", share: 10 }
+                    { brand: "Apple", name: "MacBook Air 13 (M3)", cpu: "Apple M3 (18 TOPS)", screen: "13.6 inch Liquid Retina", msrp_us: 1499, street_us: 1349, msrp_tw: 47900, street_tw: 44500, msrp_cn: 10499, street_cn: 9899, share: 42 },
+                    { brand: "Lenovo", name: "Yoga Slim 7i Aura", cpu: "Intel Lunar Lake (48 TOPS)", screen: "15.3 inch 2.8K IPS", msrp_us: 1299, street_us: 1149, msrp_tw: 42900, street_tw: 38900, msrp_cn: 7999, street_cn: 7499, share: 20 },
+                    { brand: "Dell", name: "XPS 13 (9350)", cpu: "Intel Lunar Lake (48 TOPS)", screen: "13.4 inch 3K OLED", msrp_us: 1499, street_us: 1399, msrp_tw: 58900, street_tw: 55900, msrp_cn: 12999, street_cn: 11999, share: 15 },
+                    { brand: "Acer", name: "Swift 14 AI", cpu: "Snapdragon X Plus", screen: "14.5 inch 2.5K IPS", msrp_us: 1099, street_us: 899, msrp_tw: 39900, street_tw: 34900, msrp_cn: 6999, street_cn: 6499, share: 13 },
+                    { brand: "HP", name: "OmniBook Ultra 14", cpu: "Ryzen AI 9 365", screen: "14 inch 2.2K IPS", msrp_us: 1449, street_us: 1349, msrp_tw: 52900, street_tw: 49900, msrp_cn: 9999, street_cn: 9299, share: 10 }
                 ],
-                targetBase: { cpu: "Core Ultra 7 258V", screen: "14\ inch 3K 120Hz OLED", msrp_us: 1399, street_us: 1299, street_tw: "NT$36,999", street_cn: "¥8,499" },
+                targetBase: { cpu: "Core Ultra 7 258V", screen: "14 inch 3K 120Hz OLED", msrp_us: 1399, street_us: 1299, msrp_tw: 44900, street_tw: 36999, msrp_cn: 8999, street_cn: 8499, share: 16 },
                 advice: [
-                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "不要跟進 Acer/Lenovo 的 $899 價格戰，這會毀掉 Zenbook 品牌定位！建議在北美推出「Creator Bundle」(送 Adobe CC)，維持高單價同時增加誘因。" },
-                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "在亞太主場，主打「完勝 MacBook Air 的視聽娛樂體驗」。MBA 只有 60Hz 螢幕，而 Zenbook 擁有 120Hz OLED 與完整的 HDMI/USB-A 接口，突顯「不需帶轉接線」的優勢。" },
+                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "不要跟進 Acer/Lenovo 的低價紅海，這會毀掉 Zenbook 品牌定位！建議推出「Creator Bundle」(送 Adobe CC 等)，維持高單價同時增加購買誘因。" },
+                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "主打「完勝 MacBook Air 的視聽娛樂體驗」。MBA 只有 60Hz 螢幕，而 Zenbook 擁有 120Hz OLED 與完整的 HDMI/USB-A 接口，突顯不需攜帶轉接線的商務優勢。" },
                     { ai: "xAI Grok", color: "grok", icon: "🟠", text: "針對輕量化對手，發起社群 #ZenbookUnplugged 挑戰。尋找 KOL 測試一整天不帶充電器的極致續航力，並強調陶瓷鋁材質的抗刮防指紋特性。" }
                 ]
             },
             rog: {
                 competitors: [
-                    { brand: "Razer", name: "Blade 16", cpu: "Core i9-14900HX / RTX 4080", screen: "16 inch Dual Mini-LED", msrp_us: 3299, street_us: 2999, street_tw: "NT$105,000", street_cn: "¥24,999", share: 18 },
-                    { brand: "Lenovo", name: "Legion Pro 7i", cpu: "Core i9-14900HX / RTX 4080", screen: "16 inch WQXGA 240Hz IPS", msrp_us: 2799, street_us: 2399, street_tw: "NT$78,900", street_cn: "¥16,999", share: 35 },
-                    { brand: "Alienware", name: "m16 R2", cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch QHD+ 240Hz", msrp_us: 2699, street_us: 2499, street_tw: "NT$85,000", street_cn: "¥18,999", share: 22 },
-                    { brand: "HP", name: "OMEN Transcend 16", cpu: "Core i9 / RTX 4070", screen: "16 inch 2.5K 240Hz OLED", msrp_us: 2199, street_us: 1899, street_tw: "NT$65,000", street_cn: "¥13,999", share: 15 },
-                    { brand: "MSI", name: "Stealth 16 AI Studio", cpu: "Core Ultra 9 / RTX 4070", screen: "16 inch UHD+ OLED", msrp_us: 2099, street_us: 1999, street_tw: "NT$68,900", street_cn: "¥14,599", share: 10 }
+                    { brand: "Razer", name: "Blade 16", cpu: "Core i9-14900HX / RTX 4080", screen: "16 inch Dual Mini-LED", msrp_us: 3299, street_us: 2999, msrp_tw: 105000, street_tw: 99000, msrp_cn: 24999, street_cn: 23999, share: 18 },
+                    { brand: "Lenovo", name: "Legion Pro 7i", cpu: "Core i9-14900HX / RTX 4080", screen: "16 inch WQXGA 240Hz IPS", msrp_us: 2799, street_us: 2399, msrp_tw: 78900, street_tw: 72900, msrp_cn: 16999, street_cn: 15499, share: 35 },
+                    { brand: "Alienware", name: "m16 R2", cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch QHD+ 240Hz", msrp_us: 2699, street_us: 2499, msrp_tw: 85000, street_tw: 81900, msrp_cn: 18999, street_cn: 17999, share: 22 },
+                    { brand: "HP", name: "OMEN Transcend 16", cpu: "Core i9 / RTX 4070", screen: "16 inch 2.5K 240Hz OLED", msrp_us: 2199, street_us: 1899, msrp_tw: 65000, street_tw: 59900, msrp_cn: 13999, street_cn: 12999, share: 15 },
+                    { brand: "MSI", name: "Stealth 16", cpu: "Core Ultra 9 / RTX 4070", screen: "16 inch UHD+ OLED", msrp_us: 2099, street_us: 1999, msrp_tw: 68900, street_tw: 64900, msrp_cn: 14599, street_cn: 13999, share: 10 }
                 ],
-                targetBase: { cpu: "Core Ultra 9 / RTX 4080", screen: "16\ inch 2.5K 240Hz OLED", msrp_us: 2899, street_us: 2699, street_tw: "NT$89,900", street_cn: "¥19,999" },
+                targetBase: { cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch 2.5K 240Hz OLED", msrp_us: 2899, street_us: 2699, msrp_tw: 89900, street_tw: 84900, msrp_cn: 19999, street_cn: 18999, share: 25 },
                 advice: [
-                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "Legion Pro 7i 正在用極具侵略性的價格 ($2,399) 搶佔高階市場。ROG 必須強調「CNC 鋁合金一體成型工藝」與「均溫板散熱」，拉開與 Legion 塑膠感底盤的差距。" },
-                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "緊咬 Razer Blade 16 進行定價對標。提供比 Razer 便宜 $300 的售價，但提供同級的 OLED 面板與更安靜的液態金屬散熱系統，搶奪跨界創作者 (Creator) 客群。" },
+                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "Legion Pro 7i 正在用極具侵略性的價格搶佔高階市場。ROG 必須強調「CNC 鋁合金一體成型工藝」與「均溫板散熱」，拉開與 Legion 塑膠感底盤的差距。" },
+                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "緊咬 Razer Blade 16 進行定價對標。提供比 Razer 便宜的售價，但提供同級的 OLED 面板與更安靜的液態金屬散熱系統，搶奪跨界創作者 (Creator) 客群。" },
                     { ai: "xAI Grok", color: "grok", icon: "🟠", text: "北美市場對於『Slash Lighting (動態光效)』反應熱烈。建議在 Twitch 贊助實況主，讓他們在直播背景展示自訂的 ROG 燈效，強化潮牌電競信仰。" }
                 ]
             }
@@ -180,8 +186,8 @@
 
         const logs = [
             "Initiating global e-commerce web scrapers...",
-            "Bypassing CAPTCHA on BestBuy and Amazon US...",
-            "Extracting pricing data from JD.com and PChome...",
+            "Bypassing CAPTCHA on BestBuy and Amazon...",
+            "Extracting pricing data for selected region...",
             "Normalizing NPU TOPS specifications across vendors...",
             "Calculating street price variance and MSRP deltas...",
             "Routing data to Gemini 1.5 Pro for feature analysis...",
@@ -189,106 +195,121 @@
             "Compiling final C.I. Executive Dashboard..."
         ];
 
+        let currentData = null;
+        let currentModel = "";
+        let currentCountry = "tw";
+        let sortAsc = true; // Default sorting direction
+
         window.startAnalysis = async function() {
             const input = document.getElementById('modelInput').value.trim();
             if (!input) return;
+            
+            currentCountry = document.getElementById('countrySelect').value;
 
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('loader').style.display = 'block';
-            
             const logEl = document.getElementById('logText');
             
-            // Simulate processing
             for (let i = 0; i < logs.length; i++) {
                 logEl.innerText = logs[i];
-                await new Promise(r => setTimeout(r, 400 + Math.random() * 400));
+                await new Promise(r => setTimeout(r, 300 + Math.random() * 300));
             }
             
             document.getElementById('loader').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             
             renderDashboard(input);
-        }
+        };
 
-        
-        let currentData = null;
-        let currentModel = "";
-        let sortCol = "";
-        let sortAsc = true;
+        // Listen for country changes
+        document.getElementById('countrySelect').addEventListener('change', (e) => {
+            currentCountry = e.target.value;
+            if (currentData) {
+                // If already analyzing, re-render the table to show new country prices instantly
+                const selectEl = document.getElementById('countrySelect');
+                document.getElementById('targetMarketName').innerText = selectEl.options[selectEl.selectedIndex].text;
+                // Reset sorting arrow
+                document.getElementById('priceHeader').classList.remove('asc', 'desc');
+                drawTable();
+            }
+        });
+
+        function formatPrice(num, country) {
+            if (!num) return "-";
+            if (country === 'us') return '$' + num.toLocaleString();
+            if (country === 'tw') return 'NT$' + num.toLocaleString();
+            if (country === 'cn') return '¥' + num.toLocaleString();
+            return num;
+        }
 
         function renderDashboard(modelName) {
             currentModel = modelName;
             document.getElementById('targetModelName').innerText = modelName;
+            const selectEl = document.getElementById('countrySelect');
+            document.getElementById('targetMarketName').innerText = selectEl.options[selectEl.selectedIndex].text;
             
             let type = 'zenbook';
             const lower = modelName.toLowerCase();
-            if (lower.includes('rog') || lower.includes('zephyrus') || lower.includes('strix') || lower.includes('scar')) {
+            if (lower.includes('rog') || lower.includes('zephyrus') || lower.includes('strix') || lower.includes('scar') || lower.includes('g16')) {
                 type = 'rog';
             }
             
-            currentData = JSON.parse(JSON.stringify(archetypes[type])); // Deep copy
+            // Deep copy so sorting doesn't mutate archetype permanently
+            currentData = JSON.parse(JSON.stringify(archetypes[type])); 
+            
+            // Reset UI sorting indicator
+            document.getElementById('priceHeader').classList.remove('asc', 'desc');
+            
             drawTable();
             drawChart();
             drawAdvice();
         }
 
-        function extractNumber(str) {
-            if (typeof str === 'number') return str;
-            return parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
-        }
+        window.sortTable = function() {
+            sortAsc = !sortAsc;
+            let th = document.getElementById('priceHeader');
+            th.classList.remove('asc', 'desc');
+            th.classList.add(sortAsc ? 'asc' : 'desc');
 
-        function sortTable(col) {
-            if (sortCol === col) {
-                sortAsc = !sortAsc;
-            } else {
-                sortCol = col;
-                sortAsc = true;
-            }
-            
-            // Update UI headers
-            document.querySelectorAll('th.sortable').forEach(th => {
-                th.classList.remove('asc', 'desc');
-                if(th.textContent.toLowerCase().includes(col)) th.classList.add(sortAsc ? 'asc' : 'desc');
-            });
-
-            // Sort competitors
             currentData.competitors.sort((a, b) => {
-                let valA = col === 'us' ? a.street_us : col === 'tw' ? extractNumber(a.street_tw) : extractNumber(a.street_cn);
-                let valB = col === 'us' ? b.street_us : col === 'tw' ? extractNumber(b.street_tw) : extractNumber(b.street_cn);
+                let valA = a['street_' + currentCountry] || 0;
+                let valB = b['street_' + currentCountry] || 0;
                 return sortAsc ? valA - valB : valB - valA;
             });
             drawTable();
-        }
+        };
 
         function drawTable() {
             const tbody = document.querySelector('#specsTable tbody');
+            const targetSPrice = currentData.targetBase['street_' + currentCountry];
+            
             let html = `
                 <tr class="asus-highlight target-row">
                     <td>👑 ASUS ${currentModel}</td>
                     <td>${currentData.targetBase.cpu}</td>
                     <td>${currentData.targetBase.screen}</td>
                     <td>
-                        <span class="price-msrp">$${currentData.targetBase.msrp_us}</span>
-                        <span class="price-street">$${currentData.targetBase.street_us}</span>
+                        <span class="price-msrp">MSRP: ${formatPrice(currentData.targetBase['msrp_' + currentCountry], currentCountry)}</span>
+                        <span class="price-street">${formatPrice(targetSPrice, currentCountry)}</span>
                     </td>
-                    <td><span class="price-street">${currentData.targetBase.street_tw}</span></td>
-                    <td><span class="price-street">${currentData.targetBase.street_cn}</span></td>
                 </tr>
             `;
             
             currentData.competitors.forEach(c => {
-                const threatClass = (c.street_us < currentData.targetBase.street_us - 100) ? 'danger' : '';
+                const sPrice = c['street_' + currentCountry];
+                const mPrice = c['msrp_' + currentCountry];
+                // Highlight danger if competitor is more than 10% cheaper than target
+                const threatClass = (sPrice < targetSPrice * 0.9) ? 'danger' : ''; 
+                
                 html += `
                     <tr>
                         <td>${c.brand} ${c.name}</td>
                         <td>${c.cpu}</td>
                         <td>${c.screen}</td>
                         <td>
-                            <span class="price-msrp">$${c.msrp_us}</span>
-                            <span class="price-street ${threatClass}">$${c.street_us}</span>
+                            <span class="price-msrp">MSRP: ${formatPrice(mPrice, currentCountry)}</span>
+                            <span class="price-street ${threatClass}">${formatPrice(sPrice, currentCountry)}</span>
                         </td>
-                        <td><span class="price-street">${c.street_tw}</span></td>
-                        <td><span class="price-street">${c.street_cn}</span></td>
                     </tr>
                 `;
             });
@@ -301,37 +322,25 @@
             
             // Combine ASUS with competitors for unified sorting
             let allBrands = [...currentData.competitors];
-            allBrands.push({ brand: "ASUS " + currentModel, share: 16, isAsus: true });
+            allBrands.push({ brand: "ASUS " + currentModel, share: currentData.targetBase.share, isAsus: true });
             
             // Sort by share descending
             allBrands.sort((a, b) => b.share - a.share);
             
             allBrands.forEach(c => {
-                if (c.isAsus) {
-                    chartHtml += `
-                        <div class="sales-bar-container asus-highlight" style="padding: 5px; border-radius: 4px;">
-                            <div class="sales-header">
-                                <span>${c.brand}</span>
-                                <span>${c.share}% Est. Share</span>
-                            </div>
-                            <div class="sales-bar-bg">
-                                <div class="sales-bar-fill" style="width: ${c.share}%;"></div>
-                            </div>
+                const extraClass = c.isAsus ? "asus-highlight" : "";
+                const fillStyle = c.isAsus ? "" : "background: #475569;";
+                chartHtml += `
+                    <div class="sales-bar-container ${extraClass}">
+                        <div class="sales-header">
+                            <span>${c.brand}</span>
+                            <span>${c.share}% Est. Share</span>
                         </div>
-                    `;
-                } else {
-                    chartHtml += `
-                        <div class="sales-bar-container">
-                            <div class="sales-header">
-                                <span>${c.brand}</span>
-                                <span>${c.share}% Est. Share</span>
-                            </div>
-                            <div class="sales-bar-bg">
-                                <div class="sales-bar-fill" style="width: ${c.share}%; background: #475569;"></div>
-                            </div>
+                        <div class="sales-bar-bg">
+                            <div class="sales-bar-fill" style="width: ${c.share}%; ${fillStyle}"></div>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
             });
             chartEl.innerHTML = chartHtml;
         }
@@ -349,8 +358,6 @@
             });
             adviceEl.innerHTML = adviceHtml;
         }
-// Run once on load with default
-        setTimeout(() => startAnalysis(), 500);
     </script>
 </body>
 </html>
