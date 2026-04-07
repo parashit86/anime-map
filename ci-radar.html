@@ -415,6 +415,7 @@
                 age_us: rawData.targetBase.age_us,
                 age_tw: rawData.targetBase.age_tw,
                 pr: rawData.targetBase.pr,
+                pr: rawData.targetBase.pr,
                 age_cn: rawData.targetBase.age_cn,
                 msrp_us: rawData.targetBase.msrp_us,
                 street_us: rawData.targetBase.street_us,
@@ -465,6 +466,9 @@
                 if (column === 'price') {
                     valA = a['street_' + currentCountry] || 0;
                     valB = b['street_' + currentCountry] || 0;
+                } else if (column === 'pr') {
+                    valA = a['pr'] || 0;
+                    valB = b['pr'] || 0;
                 } else if (column === 'age') {
                     valA = a['age_' + currentCountry] || 0;
                     valB = b['age_' + currentCountry] || 0;
