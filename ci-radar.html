@@ -72,6 +72,8 @@
 
         .sales-bar-container { margin-bottom: 15px; padding: 5px; border-radius: 4px; transition: background 0.2s;}
         .sales-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+        .trend-up { color: #10b981; font-size: 11px; margin-left: 5px;}
+        .trend-down { color: #ef4444; font-size: 11px; margin-left: 5px;}
         .sales-bar-bg { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
         .sales-bar-fill { height: 100%; background: #475569; border-radius: 4px; transition: width 0.5s ease-out;}
         
@@ -91,8 +93,8 @@
 
     <div class="container">
         <div class="search-box">
-            <h2>全方位競品報價與銷量分析</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">選擇目標國家並輸入華碩機型，即時攝取市價、銷量並產出決策建議。</p>
+            <h2>全方位競品報價與區域銷量分析</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">選擇目標國家並輸入華碩機型，即時攝取該區市價、銷量佔比並產出決策建議。</p>
             <div class="input-group">
                 <select id="countrySelect" class="country-select">
                     <option value="us">🇺🇸 北美市場 (USD)</option>
@@ -102,7 +104,7 @@
                 <input type="text" id="modelInput" placeholder="e.g. Zenbook S 14 UX3407" value="Zenbook S 14 UX3407">
                 <button class="action-btn" onclick="startAnalysis()">📡 Start Analysis</button>
             </div>
-            <div style="margin-top: 15px; font-size: 12px; color: #64748b;">*動態支援國家切換，表格自動篩選並支援價格點擊排序</div>
+            <div style="margin-top: 15px; font-size: 12px; color: #64748b;">*動態支援國家切換，表格與銷量圖表將自動切換為該國專屬數據</div>
         </div>
 
         <div class="loader" id="loader">
@@ -116,7 +118,7 @@
             </div>
 
             <div class="card" style="margin-bottom: 20px;">
-                <h3>⚙️ 核心硬體規格與單一國家市價對標 <span class="badge">Sortable Live Data</span></h3>
+                <h3>⚙️ 同級距硬體規格與市價對標 <span class="badge">Sortable Live Data</span></h3>
                 <table id="specsTable">
                     <thead>
                         <tr>
@@ -134,7 +136,8 @@
 
             <div class="grid-2">
                 <div class="card">
-                    <h3>📈 全球市場銷量佔比預估 (同級距) <span class="badge">Sorted by Share</span></h3>
+                    <h3>📈 <span id="chartTitleMarket">台灣市場</span> 銷量佔比與季成長預估 (同級距競品) <span class="badge">Q1 vs Q2</span></h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top:-15px; margin-bottom: 15px;">*針對您輸入的型號級距，對比上一季市佔率變化 (由高至低排序)</p>
                     <div id="salesChart">
                         <!-- Injected by JS -->
                     </div>
@@ -154,51 +157,109 @@
         const archetypes = {
             zenbook: {
                 competitors: [
-                    { brand: "Apple", name: "MacBook Air 13 (M3)", cpu: "Apple M3 (18 TOPS)", screen: "13.6 inch Liquid Retina", msrp_us: 1499, street_us: 1349, msrp_tw: 47900, street_tw: 44500, msrp_cn: 10499, street_cn: 9899, share: 42 },
-                    { brand: "Lenovo", name: "Yoga Slim 7i Aura", cpu: "Intel Lunar Lake (48 TOPS)", screen: "15.3 inch 2.8K IPS", msrp_us: 1299, street_us: 1149, msrp_tw: 42900, street_tw: 38900, msrp_cn: 7999, street_cn: 7499, share: 20 },
-                    { brand: "Dell", name: "XPS 13 (9350)", cpu: "Intel Lunar Lake (48 TOPS)", screen: "13.4 inch 3K OLED", msrp_us: 1499, street_us: 1399, msrp_tw: 58900, street_tw: 55900, msrp_cn: 12999, street_cn: 11999, share: 15 },
-                    { brand: "Acer", name: "Swift 14 AI", cpu: "Snapdragon X Plus", screen: "14.5 inch 2.5K IPS", msrp_us: 1099, street_us: 899, msrp_tw: 39900, street_tw: 34900, msrp_cn: 6999, street_cn: 6499, share: 13 },
-                    { brand: "HP", name: "OmniBook Ultra 14", cpu: "Ryzen AI 9 365", screen: "14 inch 2.2K IPS", msrp_us: 1449, street_us: 1349, msrp_tw: 52900, street_tw: 49900, msrp_cn: 9999, street_cn: 9299, share: 10 }
+                    { 
+                      brand: "Apple", name: "MacBook Air 13 (M3)", cpu: "Apple M3", screen: "13.6 inch Liquid Retina", 
+                      msrp_us: 1499, street_us: 1349, share_us: {q1: 45, q2: 42}, 
+                      msrp_tw: 47900, street_tw: 44500, share_tw: {q1: 35, q2: 34},
+                      msrp_cn: 10499, street_cn: 9899, share_cn: {q1: 25, q2: 22} 
+                    },
+                    { 
+                      brand: "Lenovo", name: "Yoga Slim 7i Aura", cpu: "Intel Lunar Lake", screen: "15.3 inch 2.8K IPS", 
+                      msrp_us: 1299, street_us: 1149, share_us: {q1: 15, q2: 20}, 
+                      msrp_tw: 42900, street_tw: 38900, share_tw: {q1: 18, q2: 22},
+                      msrp_cn: 7999, street_cn: 7499, share_cn: {q1: 35, q2: 38} 
+                    },
+                    { 
+                      brand: "Dell", name: "XPS 13 (9350)", cpu: "Intel Lunar Lake", screen: "13.4 inch 3K OLED", 
+                      msrp_us: 1499, street_us: 1399, share_us: {q1: 16, q2: 15}, 
+                      msrp_tw: 58900, street_tw: 55900, share_tw: {q1: 8, q2: 8},
+                      msrp_cn: 12999, street_cn: 11999, share_cn: {q1: 10, q2: 9} 
+                    },
+                    { 
+                      brand: "Acer", name: "Swift 14 AI", cpu: "Snapdragon X Plus", screen: "14.5 inch 2.5K IPS", 
+                      msrp_us: 1099, street_us: 899, share_us: {q1: 8, q2: 13}, 
+                      msrp_tw: 39900, street_tw: 34900, share_tw: {q1: 15, q2: 18},
+                      msrp_cn: 6999, street_cn: 6499, share_cn: {q1: 12, q2: 15} 
+                    },
+                    { 
+                      brand: "HP", name: "OmniBook Ultra 14", cpu: "Ryzen AI 9 365", screen: "14 inch 2.2K IPS", 
+                      msrp_us: 1449, street_us: 1349, share_us: {q1: 11, q2: 10}, 
+                      msrp_tw: 52900, street_tw: 49900, share_tw: {q1: 6, q2: 5},
+                      msrp_cn: 9999, street_cn: 9299, share_cn: {q1: 8, q2: 7} 
+                    }
                 ],
-                targetBase: { cpu: "Core Ultra 7 258V", screen: "14 inch 3K 120Hz OLED", msrp_us: 1399, street_us: 1299, msrp_tw: 44900, street_tw: 36999, msrp_cn: 8999, street_cn: 8499, share: 16 },
+                targetBase: { 
+                    cpu: "Core Ultra 7 258V", screen: "14 inch 3K 120Hz OLED", 
+                    msrp_us: 1399, street_us: 1299, share_us: {q1: 14, q2: 16},
+                    msrp_tw: 44900, street_tw: 36999, share_tw: {q1: 16, q2: 20},
+                    msrp_cn: 8999, street_cn: 8499, share_cn: {q1: 10, q2: 9} 
+                },
                 advice: [
-                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "不要跟進 Acer/Lenovo 的低價紅海，這會毀掉 Zenbook 品牌定位！建議推出「Creator Bundle」(送 Adobe CC 等)，維持高單價同時增加購買誘因。" },
-                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "主打「完勝 MacBook Air 的視聽娛樂體驗」。MBA 只有 60Hz 螢幕，而 Zenbook 擁有 120Hz OLED 與完整的 HDMI/USB-A 接口，突顯不需攜帶轉接線的商務優勢。" },
-                    { ai: "xAI Grok", color: "grok", icon: "🟠", text: "針對輕量化對手，發起社群 #ZenbookUnplugged 挑戰。尋找 KOL 測試一整天不帶充電器的極致續航力，並強調陶瓷鋁材質的抗刮防指紋特性。" }
+                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "不要跟進 Acer/Lenovo 的低價紅海，維持高單價同時增加 Bundle 購買誘因。" },
+                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "主打「完勝 MacBook Air 的視聽娛樂體驗」，突顯不需攜帶轉接線的商務優勢。" },
+                    { ai: "xAI Grok", color: "grok", icon: "🟠", text: "針對輕量化對手，發起社群 #ZenbookUnplugged 挑戰，強調陶瓷鋁材質的抗刮防指紋特性。" }
                 ]
             },
             rog: {
                 competitors: [
-                    { brand: "Razer", name: "Blade 16", cpu: "Core i9-14900HX / RTX 4080", screen: "16 inch Dual Mini-LED", msrp_us: 3299, street_us: 2999, msrp_tw: 105000, street_tw: 99000, msrp_cn: 24999, street_cn: 23999, share: 18 },
-                    { brand: "Lenovo", name: "Legion Pro 7i", cpu: "Core i9-14900HX / RTX 4080", screen: "16 inch WQXGA 240Hz IPS", msrp_us: 2799, street_us: 2399, msrp_tw: 78900, street_tw: 72900, msrp_cn: 16999, street_cn: 15499, share: 35 },
-                    { brand: "Alienware", name: "m16 R2", cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch QHD+ 240Hz", msrp_us: 2699, street_us: 2499, msrp_tw: 85000, street_tw: 81900, msrp_cn: 18999, street_cn: 17999, share: 22 },
-                    { brand: "HP", name: "OMEN Transcend 16", cpu: "Core i9 / RTX 4070", screen: "16 inch 2.5K 240Hz OLED", msrp_us: 2199, street_us: 1899, msrp_tw: 65000, street_tw: 59900, msrp_cn: 13999, street_cn: 12999, share: 15 },
-                    { brand: "MSI", name: "Stealth 16", cpu: "Core Ultra 9 / RTX 4070", screen: "16 inch UHD+ OLED", msrp_us: 2099, street_us: 1999, msrp_tw: 68900, street_tw: 64900, msrp_cn: 14599, street_cn: 13999, share: 10 }
+                    { 
+                      brand: "Razer", name: "Blade 16", cpu: "Core i9 / RTX 4080", screen: "16 inch Dual Mini-LED", 
+                      msrp_us: 3299, street_us: 2999, share_us: {q1: 19, q2: 18},
+                      msrp_tw: 105000, street_tw: 99000, share_tw: {q1: 10, q2: 9},
+                      msrp_cn: 24999, street_cn: 23999, share_cn: {q1: 8, q2: 7} 
+                    },
+                    { 
+                      brand: "Lenovo", name: "Legion Pro 7i", cpu: "Core i9 / RTX 4080", screen: "16 inch WQXGA 240Hz", 
+                      msrp_us: 2799, street_us: 2399, share_us: {q1: 32, q2: 35},
+                      msrp_tw: 78900, street_tw: 72900, share_tw: {q1: 25, q2: 28},
+                      msrp_cn: 16999, street_cn: 15499, share_cn: {q1: 40, q2: 45} 
+                    },
+                    { 
+                      brand: "Alienware", name: "m16 R2", cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch QHD+ 240Hz", 
+                      msrp_us: 2699, street_us: 2499, share_us: {q1: 23, q2: 22},
+                      msrp_tw: 85000, street_tw: 81900, share_tw: {q1: 15, q2: 14},
+                      msrp_cn: 18999, street_cn: 17999, share_cn: {q1: 18, q2: 16} 
+                    },
+                    { 
+                      brand: "HP", name: "OMEN Transcend 16", cpu: "Core i9 / RTX 4070", screen: "16 inch 2.5K OLED", 
+                      msrp_us: 2199, street_us: 1899, share_us: {q1: 16, q2: 15},
+                      msrp_tw: 65000, street_tw: 59900, share_tw: {q1: 20, q2: 18},
+                      msrp_cn: 13999, street_cn: 12999, share_cn: {q1: 22, q2: 20} 
+                    },
+                    { 
+                      brand: "MSI", name: "Stealth 16", cpu: "Core Ultra 9 / RTX 4070", screen: "16 inch UHD+ OLED", 
+                      msrp_us: 2099, street_us: 1999, share_us: {q1: 11, q2: 10},
+                      msrp_tw: 68900, street_tw: 64900, share_tw: {q1: 18, q2: 15},
+                      msrp_cn: 14599, street_cn: 13999, share_cn: {q1: 15, q2: 13} 
+                    }
                 ],
-                targetBase: { cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch 2.5K 240Hz OLED", msrp_us: 2899, street_us: 2699, msrp_tw: 89900, street_tw: 84900, msrp_cn: 19999, street_cn: 18999, share: 25 },
+                targetBase: { 
+                    cpu: "Core Ultra 9 / RTX 4080", screen: "16 inch 2.5K 240Hz OLED", 
+                    msrp_us: 2899, street_us: 2699, share_us: {q1: 23, q2: 25},
+                    msrp_tw: 89900, street_tw: 84900, share_tw: {q1: 30, q2: 33},
+                    msrp_cn: 19999, street_cn: 18999, share_cn: {q1: 20, q2: 22} 
+                },
                 advice: [
-                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "Legion Pro 7i 正在用極具侵略性的價格搶佔高階市場。ROG 必須強調「CNC 鋁合金一體成型工藝」與「均溫板散熱」，拉開與 Legion 塑膠感底盤的差距。" },
-                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "緊咬 Razer Blade 16 進行定價對標。提供比 Razer 便宜的售價，但提供同級的 OLED 面板與更安靜的液態金屬散熱系統，搶奪跨界創作者 (Creator) 客群。" },
-                    { ai: "xAI Grok", color: "grok", icon: "🟠", text: "北美市場對於『Slash Lighting (動態光效)』反應熱烈。建議在 Twitch 贊助實況主，讓他們在直播背景展示自訂的 ROG 燈效，強化潮牌電競信仰。" }
+                    { ai: "OpenAI GPT-4o", color: "openai", icon: "🟢", text: "Legion Pro 7i 正在用極具侵略性的價格搶佔高階市場。ROG 必須強調「CNC 鋁合金一體成型工藝」拉開與塑膠底盤的差距。" },
+                    { ai: "Gemini 1.5 Pro", color: "gemini", icon: "🔵", text: "緊咬 Razer Blade 16 進行定價對標，但提供同級的 OLED 面板與更安靜的液態金屬散熱系統，搶奪跨界創作者客群。" },
+                    { ai: "xAI Grok", color: "grok", icon: "🟠", text: "北美市場對於『Slash Lighting』反應熱烈。建議在 Twitch 贊助實況主，讓他們在直播背景展示自訂的 ROG 燈效。" }
                 ]
             }
         };
 
         const logs = [
             "Initiating global e-commerce web scrapers...",
-            "Bypassing CAPTCHA on BestBuy and Amazon...",
-            "Extracting pricing data for selected region...",
-            "Normalizing NPU TOPS specifications across vendors...",
-            "Calculating street price variance and MSRP deltas...",
-            "Routing data to Gemini 1.5 Pro for feature analysis...",
-            "Routing data to GPT-4o for pricing strategy formulation...",
-            "Compiling final C.I. Executive Dashboard..."
+            "Bypassing CAPTCHA on target region...",
+            "Extracting pricing and inventory data...",
+            "Correlating local market share with previous quarter...",
+            "Routing data to LLM swarm for strategy formulation...",
+            "Compiling final Regional Executive Dashboard..."
         ];
 
         let currentData = null;
         let currentModel = "";
         let currentCountry = "tw";
-        let sortAsc = true; // Default sorting direction
+        let sortAsc = true; 
 
         window.startAnalysis = async function() {
             const input = document.getElementById('modelInput').value.trim();
@@ -212,7 +273,7 @@
             
             for (let i = 0; i < logs.length; i++) {
                 logEl.innerText = logs[i];
-                await new Promise(r => setTimeout(r, 300 + Math.random() * 300));
+                await new Promise(r => setTimeout(r, 200 + Math.random() * 200));
             }
             
             document.getElementById('loader').style.display = 'none';
@@ -221,16 +282,15 @@
             renderDashboard(input);
         };
 
-        // Listen for country changes
         document.getElementById('countrySelect').addEventListener('change', (e) => {
             currentCountry = e.target.value;
             if (currentData) {
-                // If already analyzing, re-render the table to show new country prices instantly
                 const selectEl = document.getElementById('countrySelect');
-                document.getElementById('targetMarketName').innerText = selectEl.options[selectEl.selectedIndex].text;
-                // Reset sorting arrow
+                document.getElementById('targetMarketName').innerText = selectEl.options[selectEl.selectedIndex].text.split(' ')[1];
+                document.getElementById('chartTitleMarket').innerText = selectEl.options[selectEl.selectedIndex].text.split(' ')[1];
                 document.getElementById('priceHeader').classList.remove('asc', 'desc');
                 drawTable();
+                drawChart(); // Re-draw chart based on country specific share
             }
         });
 
@@ -246,7 +306,9 @@
             currentModel = modelName;
             document.getElementById('targetModelName').innerText = modelName;
             const selectEl = document.getElementById('countrySelect');
-            document.getElementById('targetMarketName').innerText = selectEl.options[selectEl.selectedIndex].text;
+            const marketText = selectEl.options[selectEl.selectedIndex].text.split(' ')[1];
+            document.getElementById('targetMarketName').innerText = marketText;
+            document.getElementById('chartTitleMarket').innerText = marketText;
             
             let type = 'zenbook';
             const lower = modelName.toLowerCase();
@@ -254,10 +316,8 @@
                 type = 'rog';
             }
             
-            // Deep copy so sorting doesn't mutate archetype permanently
             currentData = JSON.parse(JSON.stringify(archetypes[type])); 
             
-            // Reset UI sorting indicator
             document.getElementById('priceHeader').classList.remove('asc', 'desc');
             
             drawTable();
@@ -282,6 +342,7 @@
         function drawTable() {
             const tbody = document.querySelector('#specsTable tbody');
             const targetSPrice = currentData.targetBase['street_' + currentCountry];
+            const targetMPrice = currentData.targetBase['msrp_' + currentCountry];
             
             let html = `
                 <tr class="asus-highlight target-row">
@@ -289,7 +350,7 @@
                     <td>${currentData.targetBase.cpu}</td>
                     <td>${currentData.targetBase.screen}</td>
                     <td>
-                        <span class="price-msrp">MSRP: ${formatPrice(currentData.targetBase['msrp_' + currentCountry], currentCountry)}</span>
+                        <span class="price-msrp">MSRP: ${formatPrice(targetMPrice, currentCountry)}</span>
                         <span class="price-street">${formatPrice(targetSPrice, currentCountry)}</span>
                     </td>
                 </tr>
@@ -298,7 +359,6 @@
             currentData.competitors.forEach(c => {
                 const sPrice = c['street_' + currentCountry];
                 const mPrice = c['msrp_' + currentCountry];
-                // Highlight danger if competitor is more than 10% cheaper than target
                 const threatClass = (sPrice < targetSPrice * 0.9) ? 'danger' : ''; 
                 
                 html += `
@@ -320,24 +380,40 @@
             const chartEl = document.getElementById('salesChart');
             let chartHtml = '';
             
-            // Combine ASUS with competitors for unified sorting
             let allBrands = [...currentData.competitors];
-            allBrands.push({ brand: "ASUS " + currentModel, share: currentData.targetBase.share, isAsus: true });
+            allBrands.push({ 
+                brand: "ASUS " + currentModel, 
+                share_us: currentData.targetBase.share_us,
+                share_tw: currentData.targetBase.share_tw,
+                share_cn: currentData.targetBase.share_cn,
+                isAsus: true 
+            });
             
-            // Sort by share descending
-            allBrands.sort((a, b) => b.share - a.share);
+            // Sort by current country's Q2 share descending
+            allBrands.sort((a, b) => b['share_'+currentCountry].q2 - a['share_'+currentCountry].q2);
             
             allBrands.forEach(c => {
+                const shareData = c['share_' + currentCountry];
+                const q1 = shareData.q1;
+                const q2 = shareData.q2;
+                const diff = q2 - q1;
+                
+                let trendHtml = '';
+                if (diff > 0) trendHtml = `<span class="trend-up">▲ +${diff}%</span>`;
+                else if (diff < 0) trendHtml = `<span class="trend-down">▼ ${diff}%</span>`;
+                else trendHtml = `<span style="color:#64748b; font-size:11px; margin-left:5px;">- 0%</span>`;
+
                 const extraClass = c.isAsus ? "asus-highlight" : "";
                 const fillStyle = c.isAsus ? "" : "background: #475569;";
+                
                 chartHtml += `
                     <div class="sales-bar-container ${extraClass}">
                         <div class="sales-header">
                             <span>${c.brand}</span>
-                            <span>${c.share}% Est. Share</span>
+                            <span>${q2}% Est. Share ${trendHtml}</span>
                         </div>
                         <div class="sales-bar-bg">
-                            <div class="sales-bar-fill" style="width: ${c.share}%; ${fillStyle}"></div>
+                            <div class="sales-bar-fill" style="width: ${q2}%; ${fillStyle}"></div>
                         </div>
                     </div>
                 `;
