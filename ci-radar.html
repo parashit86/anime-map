@@ -212,19 +212,16 @@
     </div>
 
     
-    <!-- 資料來源 Modal -->
-    <div id="sourceModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <span class="close" onclick="closeSourceModal()">&times;</span>
-            <h2 style="color: var(--accent-cyan); margin-top: 0; display: flex; align-items: center; gap: 10px;">
-                ℹ️ <span id="sourceModalTitle" style="color: white; font-size: 20px;">資料來源</span>
-            </h2>
-            <div id="sourceModalContent" style="font-size: 14px; color: #cbd5e1; line-height: 1.6;">
-                <!-- Injected by JS -->
-            </div>
+    <!-- 資料來源 Popover -->
+    <div id="sourceModal" style="display: none; position: absolute; z-index: 3000; background: var(--bg-card); border: 1px solid var(--accent-cyan); border-radius: 8px; padding: 15px; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 10px;">
+            <strong style="color: var(--accent-cyan); font-size: 14px; display: flex; align-items: center; gap: 6px;">ℹ️ <span id="sourceModalTitle" style="color: white;"></span></strong>
+            <span style="cursor: pointer; color: #94a3b8; font-size: 20px; line-height: 1;" onclick="closeSourceModal()">&times;</span>
+        </div>
+        <div id="sourceModalContent" style="font-size: 12px; color: #cbd5e1; line-height: 1.5;">
+            <!-- Injected by JS -->
         </div>
     </div>
-
     <!-- 規格細節 Modal -->
     <div id="specModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
@@ -767,11 +764,27 @@
         };
 
         window.openSourceModal = function(type) {
+            const e = window.event;
             const data = sourceData[type];
             if (!data) return;
+            const pop = document.getElementById('sourceModal');
             document.getElementById('sourceModalTitle').innerText = data.title;
             document.getElementById('sourceModalContent').innerHTML = data.content;
-            document.getElementById('sourceModal').style.display = 'block';
+            
+            if (e && e.target) {
+                const rect = e.target.getBoundingClientRect();
+                pop.style.top = (window.scrollY + rect.bottom + 8) + 'px';
+                let left = window.scrollX + rect.left - 175 + (rect.width/2);
+                const maxLeft = window.innerWidth - 380;
+                if (left > maxLeft) left = maxLeft;
+                if (left < 10) left = 10;
+                pop.style.left = left + 'px';
+            } else {
+                pop.style.top = '20%';
+                pop.style.left = '50%';
+            }
+            pop.style.display = 'block';
+            if(e) e.stopPropagation();
         };
 
         window.closeSourceModal = function() {
@@ -1154,7 +1167,9 @@
             if (event.target == modalShare) closeShareModal();
             if (event.target == modalSpec) closeSpecModal();
             const modalSource = document.getElementById('sourceModal');
-            if (event.target == modalSource) closeSourceModal();
+            if (modalSource && modalSource.style.display === 'block' && !modalSource.contains(event.target) && !event.target.closest('[onclick^="openSourceModal"]')) {
+                closeSourceModal();
+            }
             const modalPriceList = document.getElementById('priceListModal');
             if (event.target == modalPriceList) closePriceListModal();
         }
