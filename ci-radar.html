@@ -139,6 +139,7 @@
             <div class="input-group">
                 <select id="countrySelect" class="country-select">
                     <option value="us">🇺🇸 北美市場 (USD)</option>
+                    <option value="eu">🇪🇺 歐盟市場 (EUR)</option>
                     <option value="tw" selected>🇹🇼 台灣市場 (TWD)</option>
                     <option value="cn">🇨🇳 中國市場 (CNY)</option>
                 </select>
@@ -300,40 +301,45 @@
                     { 
                       brand: "Apple", name: "MacBook Air 13 (M3)", cpu: "Apple M3", highlight: "無風扇極靜設計", 
                       details: {"處理器": "Apple M3 (8C CPU/10C GPU)", "記憶體": "16GB 統一記憶體", "儲存": "512GB SSD", "螢幕": "13.6 吋 Liquid Retina (60Hz)", "重量": "1.24 kg", "電池": "52.6 Wh"},
-                      pr: 80, age_us: 25, age_tw: 24, age_cn: 25, inv: "low",
-                      msrp_us: 1499, street_us: 1349, share_us: {q1: 45, q2: 42}, 
+                      pr: 80, age_us: 25, age_tw: 24, age_cn: 25, age_eu: 24, inv: "low",
+                      msrp_us: 1499, street_us: 1349, share_us: {q1: 45, q2: 42},
+                      msrp_eu: 1499, street_eu: 1399, share_eu: {q1: 40, q2: 38}, 
                       msrp_tw: 47900, street_tw: 44500, share_tw: {q1: 35, q2: 34},
                       msrp_cn: 10499, street_cn: 9899, share_cn: {q1: 25, q2: 22}, isAsus: false 
                     },
                     { 
                       brand: "Lenovo", name: "Yoga Slim 7i Aura", cpu: "Intel Lunar Lake", highlight: "Copilot+ PC 認證", 
                       details: {"處理器": "Intel Core Ultra 7 258V", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "15.3 吋 2.8K IPS (120Hz)", "重量": "1.46 kg", "電池": "70 Wh"},
-                      pr: 88, age_us: 6, age_tw: 5, age_cn: 6, inv: "high",
-                      msrp_us: 1299, street_us: 1149, share_us: {q1: 15, q2: 20}, 
+                      pr: 88, age_us: 6, age_tw: 5, age_cn: 6, age_eu: 6, inv: "high",
+                      msrp_us: 1299, street_us: 1149, share_us: {q1: 15, q2: 20},
+                      msrp_eu: 1299, street_eu: 1199, share_eu: {q1: 18, q2: 22}, 
                       msrp_tw: 42900, street_tw: 38900, share_tw: {q1: 18, q2: 22},
                       msrp_cn: 7999, street_cn: 7499, share_cn: {q1: 35, q2: 38}, isAsus: false 
                     },
                     { 
                       brand: "Dell", name: "XPS 13 (9350)", cpu: "Intel Lunar Lake", highlight: "無邊框觸控列", 
                       details: {"處理器": "Intel Core Ultra 7 258V", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "13.4 吋 3K OLED 觸控", "重量": "1.17 kg", "電池": "55 Wh"},
-                      pr: 92, age_us: 5, age_tw: 4, age_cn: 5, inv: "out",
-                      msrp_us: 1499, street_us: 1399, share_us: {q1: 16, q2: 15}, 
+                      pr: 92, age_us: 5, age_tw: 4, age_cn: 5, age_eu: 5, inv: "out",
+                      msrp_us: 1499, street_us: 1399, share_us: {q1: 16, q2: 15},
+                      msrp_eu: 1599, street_eu: 1499, share_eu: {q1: 14, q2: 13}, 
                       msrp_tw: 58900, street_tw: 55900, share_tw: {q1: 8, q2: 8},
                       msrp_cn: 12999, street_cn: 11999, share_cn: {q1: 10, q2: 9}, isAsus: false 
                     },
                     { 
                       brand: "Acer", name: "Swift 14 AI", cpu: "Snapdragon X Plus", highlight: "ARM 高效長續航", 
                       details: {"處理器": "Snapdragon X Plus (10-core)", "記憶體": "16GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "14.5 吋 2.5K IPS (120Hz)", "重量": "1.32 kg", "電池": "75 Wh"},
-                      pr: 75, age_us: 8, age_tw: 9, age_cn: 8, inv: "high",
-                      msrp_us: 1099, street_us: 899, share_us: {q1: 8, q2: 13}, 
+                      pr: 75, age_us: 8, age_tw: 9, age_cn: 8, age_eu: 8, inv: "high",
+                      msrp_us: 1099, street_us: 899, share_us: {q1: 8, q2: 13},
+                      msrp_eu: 1099, street_eu: 999, share_eu: {q1: 10, q2: 14}, 
                       msrp_tw: 39900, street_tw: 34900, share_tw: {q1: 15, q2: 18},
                       msrp_cn: 6999, street_cn: 6499, share_cn: {q1: 12, q2: 15}, isAsus: false 
                     },
                     { 
                       brand: "HP", name: "OmniBook Ultra 14", cpu: "Ryzen AI 9 365", highlight: "AI 視訊強化", 
                       details: {"處理器": "AMD Ryzen AI 9 365", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "14 吋 2.2K IPS", "重量": "1.57 kg", "電池": "68 Wh"},
-                      pr: 85, age_us: 7, age_tw: 6, age_cn: 7, inv: "low",
-                      msrp_us: 1449, street_us: 1349, share_us: {q1: 11, q2: 10}, 
+                      pr: 85, age_us: 7, age_tw: 6, age_cn: 7, age_eu: 7, inv: "low",
+                      msrp_us: 1449, street_us: 1349, share_us: {q1: 11, q2: 10},
+                      msrp_eu: 1449, street_eu: 1349, share_eu: {q1: 12, q2: 11}, 
                       msrp_tw: 52900, street_tw: 49900, share_tw: {q1: 6, q2: 5},
                       msrp_cn: 9999, street_cn: 9299, share_cn: {q1: 8, q2: 7}, isAsus: false 
                     }
@@ -341,8 +347,9 @@
                 targetBase: { 
                     cpu: "Core Ultra 7 258V", highlight: "高科技陶瓷鋁合金", 
                     details: {"處理器": "Intel Core Ultra 7 258V", "記憶體": "32GB LPDDR5x", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "14 吋 3K 120Hz Lumina OLED", "重量": "1.20 kg", "電池": "72 Wh"},
-                    pr: 95, age_us: 5, age_tw: 6, age_cn: 5, inv: "high",
+                    pr: 95, age_us: 5, age_tw: 6, age_cn: 5, age_eu: 5, inv: "high",
                     msrp_us: 1399, street_us: 1299, share_us: {q1: 14, q2: 16},
+                    msrp_eu: 1499, street_eu: 1399, share_eu: {q1: 12, q2: 15},
                     msrp_tw: 44900, street_tw: 36999, share_tw: {q1: 16, q2: 20},
                     msrp_cn: 8999, street_cn: 8499, share_cn: {q1: 10, q2: 9} 
                 },
@@ -357,40 +364,45 @@
                     { 
                       brand: "Razer", name: "Blade 16", cpu: "Core i9 / RTX 4080", highlight: "一體成型鋁合金", 
                       details: {"處理器": "Intel Core i9-14900HX", "顯示卡": "NVIDIA RTX 4080 (175W)", "記憶體": "32GB DDR5-5600", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 Dual-mode Mini-LED (4K 120Hz / FHD 240Hz)", "重量": "2.45 kg"},
-                      pr: 92, age_us: 14, age_tw: 13, age_cn: 14, inv: "low",
+                      pr: 92, age_us: 14, age_tw: 13, age_cn: 14, age_eu: 14, inv: "low",
                       msrp_us: 3299, street_us: 2999, share_us: {q1: 19, q2: 18},
+                      msrp_eu: 3499, street_eu: 3199, share_eu: {q1: 18, q2: 17},
                       msrp_tw: 105000, street_tw: 99000, share_tw: {q1: 10, q2: 9},
                       msrp_cn: 24999, street_cn: 23999, share_cn: {q1: 8, q2: 7}, isAsus: false 
                     },
                     { 
                       brand: "Lenovo", name: "Legion Pro 7i", cpu: "Core i9 / RTX 4080", highlight: "ColdFront 散熱系統", 
                       details: {"處理器": "Intel Core i9-14900HX", "顯示卡": "NVIDIA RTX 4080 (175W)", "記憶體": "32GB DDR5-5600", "儲存": "2TB PCIe Gen4 SSD", "螢幕": "16 吋 WQXGA IPS (240Hz)", "重量": "2.80 kg"},
-                      pr: 88, age_us: 12, age_tw: 11, age_cn: 12, inv: "high",
+                      pr: 88, age_us: 12, age_tw: 11, age_cn: 12, age_eu: 12, inv: "high",
                       msrp_us: 2799, street_us: 2399, share_us: {q1: 32, q2: 35},
+                      msrp_eu: 2899, street_eu: 2499, share_eu: {q1: 30, q2: 34},
                       msrp_tw: 78900, street_tw: 72900, share_tw: {q1: 25, q2: 28},
                       msrp_cn: 16999, street_cn: 15499, share_cn: {q1: 40, q2: 45}, isAsus: false 
                     },
                     { 
                       brand: "Alienware", name: "m16 R2", cpu: "Core Ultra 9 / RTX 4080", highlight: "隱形模式 (Stealth Mode)", 
                       details: {"處理器": "Intel Core Ultra 9 185H", "顯示卡": "NVIDIA RTX 4080", "記憶體": "32GB DDR5", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 QHD+ (240Hz)", "重量": "2.61 kg"},
-                      pr: 90, age_us: 4, age_tw: 3, age_cn: 4, inv: "high",
+                      pr: 90, age_us: 4, age_tw: 3, age_cn: 4, age_eu: 4, inv: "high",
                       msrp_us: 2699, street_us: 2499, share_us: {q1: 23, q2: 22},
+                      msrp_eu: 2799, street_eu: 2599, share_eu: {q1: 25, q2: 23},
                       msrp_tw: 85000, street_tw: 81900, share_tw: {q1: 15, q2: 14},
                       msrp_cn: 18999, street_cn: 17999, share_cn: {q1: 18, q2: 16}, isAsus: false 
                     },
                     { 
                       brand: "HP", name: "OMEN Transcend 16", cpu: "Core i9 / RTX 4070", highlight: "輕薄電競設計", 
                       details: {"處理器": "Intel Core i9-14900HX", "顯示卡": "NVIDIA RTX 4070 (130W)", "記憶體": "32GB DDR5", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 2.5K OLED (240Hz)", "重量": "2.10 kg"},
-                      pr: 82, age_us: 10, age_tw: 9, age_cn: 10, inv: "low",
+                      pr: 82, age_us: 10, age_tw: 9, age_cn: 10, age_eu: 10, inv: "low",
                       msrp_us: 2199, street_us: 1899, share_us: {q1: 16, q2: 15},
+                      msrp_eu: 2299, street_eu: 1999, share_eu: {q1: 18, q2: 17},
                       msrp_tw: 65000, street_tw: 59900, share_tw: {q1: 20, q2: 18},
                       msrp_cn: 13999, street_cn: 12999, share_cn: {q1: 22, q2: 20}, isAsus: false 
                     },
                     { 
                       brand: "MSI", name: "Stealth 16", cpu: "Core Ultra 9 / RTX 4070", highlight: "鎂鋁合金超輕量", 
                       details: {"處理器": "Intel Core Ultra 9 185H", "顯示卡": "NVIDIA RTX 4070", "記憶體": "32GB DDR5", "儲存": "1TB PCIe Gen4 SSD", "螢幕": "16 吋 UHD+ Mini-LED (120Hz)", "重量": "1.99 kg"},
-                      pr: 85, age_us: 5, age_tw: 5, age_cn: 4, inv: "out",
+                      pr: 85, age_us: 5, age_tw: 5, age_cn: 4, age_eu: 5, inv: "out",
                       msrp_us: 2099, street_us: 1999, share_us: {q1: 11, q2: 10},
+                      msrp_eu: 2299, street_eu: 2099, share_eu: {q1: 10, q2: 9},
                       msrp_tw: 68900, street_tw: 64900, share_tw: {q1: 18, q2: 15},
                       msrp_cn: 14599, street_cn: 13999, share_cn: {q1: 15, q2: 13}, isAsus: false 
                     }
@@ -398,8 +410,9 @@
                 targetBase: { 
                     cpu: "Core Ultra 9 / RTX 4080", highlight: "Slash 動態燈效與 CNC 鋁合金", 
                     details: {"處理器": "Intel Core Ultra 9 185H", "顯示卡": "NVIDIA RTX 4080 (115W)", "記憶體": "32GB LPDDR5x", "儲存": "2TB PCIe Gen4 SSD", "螢幕": "16 吋 2.5K 240Hz Nebula OLED", "重量": "1.85 kg", "散熱": "三風扇 + 液態金屬"},
-                    pr: 96, age_us: 4, age_tw: 4, age_cn: 3, inv: "high",
+                    pr: 96, age_us: 4, age_tw: 4, age_cn: 3, age_eu: 4, inv: "high",
                     msrp_us: 2899, street_us: 2699, share_us: {q1: 23, q2: 25},
+                    msrp_eu: 2999, street_eu: 2899, share_eu: {q1: 22, q2: 24},
                     msrp_tw: 89900, street_tw: 84900, share_tw: {q1: 30, q2: 33},
                     msrp_cn: 19999, street_cn: 18999, share_cn: {q1: 20, q2: 22} 
                 },
@@ -464,6 +477,7 @@
         function formatPrice(num, country) {
             if (!num) return "-";
             if (country === 'us') return '$' + num.toLocaleString();
+            if (country === 'eu') return '€' + num.toLocaleString();
             if (country === 'tw') return 'NT$' + num.toLocaleString();
             if (country === 'cn') return '¥' + num.toLocaleString();
             return num;
@@ -537,13 +551,17 @@
                 review_url: rawData.targetBase.review_url,
                 inv: rawData.targetBase.inv,
                 age_us: rawData.targetBase.age_us,
+                age_eu: rawData.targetBase.age_eu,
                 age_tw: rawData.targetBase.age_tw,
                 age_cn: rawData.targetBase.age_cn,
                 msrp_us: rawData.targetBase.msrp_us,
                 street_us: rawData.targetBase.street_us,
                 share_us: rawData.targetBase.share_us,
+                msrp_eu: rawData.targetBase.msrp_eu,
                 msrp_tw: rawData.targetBase.msrp_tw,
+                street_eu: rawData.targetBase.street_eu,
                 street_tw: rawData.targetBase.street_tw,
+                share_eu: rawData.targetBase.share_eu,
                 share_tw: rawData.targetBase.share_tw,
                 msrp_cn: rawData.targetBase.msrp_cn,
                 street_cn: rawData.targetBase.street_cn,
@@ -560,6 +578,7 @@
             currentData.competitors.forEach(c => {
                 if(!c.sources_us) c.sources_us = genSources(c.street_us, 'us');
                 if(!c.sources_tw) c.sources_tw = genSources(c.street_tw, 'tw');
+                if(!c.sources_eu) c.sources_eu = genSources(c.street_eu, 'eu');
                 if(!c.sources_cn) c.sources_cn = genSources(c.street_cn, 'cn');
             });
             
@@ -722,6 +741,7 @@
                         
                         <li style="margin-bottom: 10px;"><strong>台灣終端市價 (動態爬蟲)：</strong><br><span style="color:#94a3b8;">PChome 24h, MOMO 購物網, 蝦皮商城, Yahoo奇摩購物, 燦坤3C, 全國電子</span></li>
                         <li style="margin-bottom: 10px;"><strong>北美終端市價 (動態爬蟲)：</strong><br><span style="color:#94a3b8;">Amazon, BestBuy, B&H Photo, Newegg, Micro Center, Walmart</span></li>
+                        <li style="margin-bottom: 10px;"><strong>歐盟終端市價 (動態爬蟲)：</strong><br><span style="color:#94a3b8;">Amazon DE, MediaMarkt, Saturn, Cyberport, Alternate</span></li>
                         <li style="margin-bottom: 10px;"><strong>中國終端市價 (動態爬蟲)：</strong><br><span style="color:#94a3b8;">京東 (JD.com), 天貓 (Tmall), 淘寶 (Taobao), 蘇寧易購, 拼多多</span></li>
                         <li style="margin-bottom: 10px;"><strong>更新頻率：</strong>每日 08:00 (UTC+8) 自動擷取</li>
                     </ul>`
@@ -1029,6 +1049,7 @@
             const retailers = {
                 'us': ['Amazon', 'BestBuy', 'B&H Photo', 'Newegg', 'Micro Center', 'Walmart'],
                 'tw': ['PChome 24h', 'MOMO購物網', '蝦皮商城', 'Yahoo奇摩購物', '燦坤3C', '全國電子'],
+                'eu': ['Amazon DE', 'MediaMarkt', 'Saturn', 'Cyberport', 'Alternate', 'Notebooksbilliger'],
                 'cn': ['京東 (JD.com)', '天貓 (Tmall)', '淘寶 (Taobao)', '蘇寧易購', '拼多多', '微店']
             };
             const arr = retailers[ctry];
